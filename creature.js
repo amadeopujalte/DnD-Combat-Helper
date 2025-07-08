@@ -37,7 +37,8 @@ function transformIntoSlug(monsterName){
     monsterName.replace(' ', '-')
     return monsterName
 }
-async function searchMonster(monsterSlug){
+async function searchMonster(monsterName){
+    monsterSlug = transformIntoSlug(monsterName)
     var monster
     monster =  creatureList.find(p => p.slug === monsterSlug) || homebrewCreatureList.find(p => p.slug === monsterSlug)
     if(!monster){

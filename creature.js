@@ -26,6 +26,37 @@ class Creature {
     this.traits = []
     this.features = []
     this.actions = []
+    
+    function d20(){
+        roll = self.getRandomIntInclusive(1,20)
+        return roll
+        }
+    function d12(){
+        roll = self.getRandomIntInclusive(1,12)
+        return roll
+        }
+ function d10(){
+        roll = self.getRandomIntInclusive(1,12)
+        return roll
+        }
+ function d8(){
+        roll = self.getRandomIntInclusive(1,12)
+        return roll
+        }
+ function d6(){
+        roll = self.getRandomIntInclusive(1,12)
+        return roll
+        }
+ function d4(){
+        roll = self.getRandomIntInclusive(1,4)
+        return roll
+        }
+
+    function getRandomIntInclusive(min, max) {
+        const minCeiled = Math.ceil(min);
+        const maxFloored = Math.floor(max);
+        return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); // The maximum is inclusive and the minimum is inclusive
+}
   }
 }
 let creatureList = []

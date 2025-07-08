@@ -36,6 +36,7 @@ class Creature {
         return roll
         }
  function d10(){
+        //The d10 also represents the percentile dice. 
         roll = self.getRandomIntInclusive(1,12)
         return roll
         }
@@ -61,19 +62,18 @@ class Creature {
 }
 let creatureList = []
 let homebrewCreatureList = []
-//const MONSTERAPI = https://api.open5e.com/v1/monsters/
 
 function transformIntoSlug(monsterName){
-    monsterName.toLowerCase()
-    monsterName.replace(' ', '-')
-    return monsterName
+    var slug =  monsterName.toLowerCase().replace(' ', '-')
+    return slug
 }
 async function searchMonster(monsterName){
-    monsterSlug = transformIntoSlug(monsterName)
+    var monsterSlug = transformIntoSlug(monsterName)
     var monster
     monster =  creatureList.find(p => p.slug === monsterSlug) || homebrewCreatureList.find(p => p.slug === monsterSlug)
     if(!monster){
-        try{    
+        try{   
+            //Debo adaptar los monstruos extraidos de aca a los datos de la clase Creature para poder usar cosas como iniative.
             const response = await fetch(`https://api.open5e.com/v1/monsters/${monsterSlug}/`)
             var data = await response.json()
             monster = data
@@ -94,3 +94,4 @@ async function searchMonster(monsterName){
 //Create homebrew creature
 //Eliminate homebrew creature
 //Filtrar Info del monstruo (Tal vez)
+export { Creature, creatureList, homebrewCreatureList, transformIntoSlug , searchMonster }

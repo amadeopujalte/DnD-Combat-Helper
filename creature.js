@@ -1,65 +1,93 @@
+class Action {
+  constructor({ name, desc, attack_bonus = null, damage_dice = null }) {
+    this.name = name;
+    this.desc = desc;
+    this.attack_bonus = attack_bonus;
+    this.damage_dice = damage_dice;
+  }
+}
+
+class Trait {
+  constructor({ name, desc }) {
+    this.name = name;
+    this.desc = desc;
+  }
+}
+
+
 
 class Creature {
-  constructor(slug,name, creatureType, cr, alignment, str, dex, con, int, wis, cha, hp, armorClass, speed) {
-    this.slug = slug
-    this.name = name
-    this.creatureType = creatureType
-    //this.isPlayer = isPlayer
-    this.cr = cr
-    this.alignment = alignment
+  constructor({
+    slug,    
+    name,
+    type,
+    hp,
+    ac,
+    speed,         // Esperado: { walk, swim, burrow, fly }
+    actions = [],
+    stats,         // { str, dex, con, int, wis, cha }
+    resistances = [],
+    immunities = [],
+    traits,
+    features,
+    hit_dice
+  }) {
+    this.slug = slug;
+    this.name = name;
+    this.type = type;
+    this.hp = hp;
+    this.ac = ac;
 
-    // Atributos
-    this.hp = hp
-    this.armorClass = armorClass
-    this.speed = speed
-    this.str = str
-    this.dex = dex
-    this.con = con
-    this.wis = wis
-    this.int = int
-    this.cha = cha
+    // Velocidades individuales (null si no tiene)
+    this.speed = {
+      walk: speed.walk || 0,
+      swim: speed.swim || 0,
+      burrow: speed.burrow || 0,
+      fly: speed.fly || 0
+    };
 
-    // Se calcula iniciativa a partir del modificador de DEX
-    this.initiative = Math.floor((dex - 10) / 2)
-
-    // Traits, features, actions
-    this.traits = []
-    this.features = []
-    this.actions = []
-    
-    function d20(){
-        roll = self.getRandomIntInclusive(1,20)
+    this.actions = actions;
+    this.stats = stats;
+    this.resistances = resistances;
+    this.immunities = immunities;
+    this.traits = traits;
+    this.hit_dice = hit_dice;
+    this.initiative = Math.floor((stats.dex-10)/2)
+    this.initiativeRoll
+  }
+    d20(){
+       var roll = this.getRandomIntInclusive(1,20)
         return roll
         }
-    function d12(){
-        roll = self.getRandomIntInclusive(1,12)
+    d12(){
+        var roll = this.getRandomIntInclusive(1,12)
         return roll
         }
- function d10(){
+    d10(){
         //The d10 also represents the percentile dice. 
-        roll = self.getRandomIntInclusive(1,12)
+        var roll = this.getRandomIntInclusive(1,12)
         return roll
         }
- function d8(){
-        roll = self.getRandomIntInclusive(1,12)
+    d8(){
+        var roll = this.getRandomIntInclusive(1,12)
         return roll
         }
- function d6(){
-        roll = self.getRandomIntInclusive(1,12)
+     d6(){
+        var roll = this.getRandomIntInclusive(1,12)
         return roll
         }
- function d4(){
-        roll = self.getRandomIntInclusive(1,4)
+     d4(){
+        var roll = this.getRandomIntInclusive(1,4)
         return roll
         }
 
-    function getRandomIntInclusive(min, max) {
+    getRandomIntInclusive(min, max) {
         const minCeiled = Math.ceil(min);
         const maxFloored = Math.floor(max);
         return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); // The maximum is inclusive and the minimum is inclusive
+    }
 }
-  }
-}
+
 let creatureList = []
 let homebrewCreatureList = []
 
@@ -72,26 +100,128 @@ async function searchMonster(monsterName){
     var monster
     monster =  creatureList.find(p => p.slug === monsterSlug) || homebrewCreatureList.find(p => p.slug === monsterSlug)
     if(!monster){
-        try{   
-            //Debo adaptar los monstruos extraidos de aca a los datos de la clase Creature para poder usar cosas como iniative.
-            const response = await fetch(`https://api.open5e.com/v1/monsters/${monsterSlug}/`)
-            var data = await response.json()
-            monster = data
-            if(response.ok === true){
+            monster = await getMonster(monsterSlug)
+            if(monster!== 0){
+            // Adapta los monstruos extraidos del fecth a los datos de la clase Creature para poder usar cosas como iniative.
+                monster = convertToCreature(monster)
                 creatureList.push(monster)
-                }
-            else{
-                console.log("Server Error", response)
-                return 0}
-        }
-        catch(error){
-            console.log("Error connecting to API.",error)
-            return 0}
+            }
     }
     return monster
+        }
+
+async function getMonster(monsterSlug){
+    try{
+    const response = await fetch(`https://api.open5e.com/v1/monsters/${monsterSlug}/`)
+    var data = await response.json()
+    var monster = data
+    if(response.ok === true){
+        return monster
+    }
+
+    else{
+        console.log("Server Error", response)
+        return 0}
+    }
+    catch(error){
+        console.log("Error connecting to API.",error)
+        return 0}
 }
+
+function convertToCreature(monsterData) {
+  const {
+    slug,
+    name,
+    type,
+    hit_points,
+    armor_class,
+    hit_dice,
+    speed = {},
+    actions = [],
+    spell_list = [],
+    legendary_actions = [],
+    damage_resistances,
+    damage_immunities,
+    condition_immunities,
+    strength, dexterity, constitution, intelligence, wisdom, charisma,
+    special_abilities = [],
+    senses = ""
+  } = monsterData;
+
+  // 1. Unificar acciones, hechizos y acciones legendarias
+  const allActions = [
+    ...actions,
+    ...spell_list.map(spell => ({
+      name: spell,
+      desc: `(Spell) Casts ${spell}`
+    })),
+    ...(legendary_actions || []).map(la => ({
+      name: la.name,
+      desc: la.desc
+    }))
+  ];
+
+  // 2. Construir stats
+  const stats = {
+    str: strength,
+    dex: dexterity,
+    con: constitution,
+    int: intelligence,
+    wis: wisdom,
+    cha: charisma
+  };
+
+  // 3. Traits: convertir special_abilities y senses
+  const traits = [
+    ...(special_abilities || []).map(t => ({
+      name: t.name,
+      desc: t.desc
+    })),
+    ...(senses ? [{
+      name: "Senses",
+      desc: senses
+    }] : [])
+  ];
+
+  // 4. Features: vacío por ahora (puede usarse para acciones especiales no en traits)
+  const features = [];
+
+  // 5. Resistencias e inmunidades como arrays (si son strings separados por `;` o `,`)
+  const resistances = parseDelimitedList(damage_resistances);
+  const immunities = [
+    ...parseDelimitedList(damage_immunities),
+    ...parseDelimitedList(condition_immunities)
+  ];
+
+  // 6. Crear instancia
+  return new Creature({
+    slug,
+    name,
+    type,
+    hp: hit_points,
+    ac: armor_class,
+    speed,
+    actions: allActions,
+    stats,
+    resistances,
+    immunities,
+    traits,
+    features,
+    hit_dice
+  });
+}
+
+// Helper para convertir strings en arrays limpios
+function parseDelimitedList(input) {
+  if (!input || typeof input !== 'string') return [];
+  return input
+    .split(/[,;]+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
+} 
+ 
 //Funciones a realizar
 //Create homebrew creature
 //Eliminate homebrew creature
 //Filtrar Info del monstruo (Tal vez)
-export { Creature, creatureList, homebrewCreatureList, transformIntoSlug , searchMonster }
+export { Creature, creatureList, homebrewCreatureList, transformIntoSlug , searchMonster, getMonster, convertToCreature, parseDelimitedList }

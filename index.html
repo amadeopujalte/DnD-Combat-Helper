@@ -1,60 +1,43 @@
 <!DOCTYPE html>
-<html lang ="en">
-    <head>
-        <title> DnD Combat Helper </title>    
-    </head>
-    
-    <body>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>DnD Combat Helper</title>
+    <style>
+      table {
+        width: 60%;
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+      th, td {
+        border: 1px solid black;
+        padding: 10px;
+      }
+    </style>
+  </head>
 
-        <header> <h1>Dungeons & Dragons Combat Helper</h1> </header>
-        <div>
-            <style>
-                table {
-                    width: 60%;
-                    border: 1px solid black;
-                    border-collapse: collapse;
-                }
-                th, td {
-                    border: 1px solid black;
-                    padding: 10px;
-                }
-            </style>
-            <table>
-                <tr>
-                    <th> Iniative </th>
-                    <th> Name </th>
-                    <th> Hp </th>
-                    <th> AC </th>
-                    <th> Current state & effects </th>
-                </tr>
+  <body>
+    <header>
+      <h1>Dungeons & Dragons Combat Helper</h1>
+    </header>
 
-                <tr>
-                    <td> </td>
-                    <td> </td>
-                    <td> </td>
-                    <td> </td>
-                    <td> </td>
-                </tr>    
-                <tr>
-                    <td> </td>
-                    <td> </td>
-                    <td> </td>
-                    <td> </td>
-                    <td> </td>
-                </tr>    
-                <tr>
-                    <td> </td>
-                    <td> </td>
-                    <td> </td>
-                    <td> </td>
-                    <td> </td>
-                </tr>    
-
-            </table>
-        </div>
-    </body>  
+      <table>
+        <thead>
+          <tr>
+            <th>Initiative</th>
+            <th>Name</th>
+            <th>Hp</th>
+            <th>AC</th>
+            <th>Current state & effects</th>
+          </tr>
+        </thead>
+        <button id="new_unit"> +New unit </button>
+        <button id="sort"> Sort </button>
+        <tbody id="table_stats">
+          <!-- Aquí se agregarán las filas dinámicamente -->
+        </tbody>
+      </table>
+    <script type="module" src="main.js" defer></script>
+  </body>
 </html>
-
-
-
 

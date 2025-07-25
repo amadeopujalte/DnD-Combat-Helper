@@ -1,31 +1,56 @@
 import * as Creature from './creature.js'
+import * as Unit from './unit.js'
 
-let combatList = []   // list of creatures in combat
+function renderTable(){
+    //Document conecta el HTML especificamente de la tabla con la variable para poder modificarla
+    const tbody = document.getElementById("table_stats")
+    //Limpia lo que sea que haya dentro
+    tbody.innerHTML= ""
+    Unit.unitList.forEach( (e) => {
+        const row = document.createElement("tr")
 
-function getCombatList(){
-    return combatList
+        const cellInitiative = document.createElement("td")
+        cellInitiative.textContent = e.initiative
+
+        const cellName = document.createElement("td")
+        cellName.textContent = e.name
+
+        const cellHp = document.createElement("td")
+        cellHp.textContent = e.hp
+
+        const cellAc = document.createElement("td")
+        cellAc.textContent = e.ac
+
+        const cellStateEffects = document.createElement("td")
+        cellStateEffects.textContent = " "
+        row.appendChild(cellInitiative)
+        row.appendChild(cellName)
+        row.appendChild(cellHp)
+        row.appendChild(cellAc)
+        row.appendChild(cellStateEffects)
+        tbody.appendChild(row)
+    })
+    console.log("Tabla renderizada")
 }
-function sortCombatList(){
-    combatList.forEach( (e) =>{ e.initiativeRoll = (e.initiative + e.d20())
-        console.log("Roll: ", e.initiativeRoll)})
-    combatList.sort((a,b) => b.initiativeRoll - a.initiativeRoll)
-}
 
-async function addMonsterToCombatList(monsterName){
-    const monster = await Creature.searchMonster(monsterName)
-    if(monster !== 0){
-        combatList.push(monster)
-    }
-    else{
-        console.log("Monster could not be added")
-    }
+function addNewUnit(){
+    const input = document.createElement("input")
+    input.type = "text"
+    input.id = "monster_name"
+    input.placeholder = "Insert monster's name"
+    document.body.appendChild(input)
+    input.focus()
+    input.addEventListener("keydown", async (event) => {
+        if(event.key == "Enter"){
+            const monster = input.value
+            await Unit.newUnit(monster)
+            input.remove()
+            renderTable()
+        }})
 }
-export { addMonsterToCombatList, sortCombatList, getCombatList }
-
-await addMonsterToCombatList("Goblin")
-await addMonsterToCombatList("Angelic Enforcer")
-await addMonsterToCombatList("Alchemical Golem")
-combatList.forEach( (e) => console.log(e.name))
-sortCombatList()
-combatList.forEach( (e) => console.log(e.name))
+document.getElementById("new_unit").addEventListener("click", addNewUnit)
+document.getElementById("sort").addEventListener("click", () =>{
+    //Unit.sortCombatList()
+    Unit.sortUnitList()
+    renderTable()})
 

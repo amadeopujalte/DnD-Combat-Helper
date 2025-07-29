@@ -28,6 +28,7 @@ class Creature {
     stats,         // { str, dex, con, int, wis, cha }
     resistances = [],
     immunities = [],
+    vulnerabilities = [],
     traits,
     features,
     hit_dice
@@ -50,6 +51,7 @@ class Creature {
     this.stats = stats;
     this.resistances = resistances;
     this.immunities = immunities;
+    this.vulnerabilities = vulnerabilities;
     this.traits = traits;
     this.hit_dice = hit_dice;
     this.initiative = Math.floor((stats.dex-10)/2)
@@ -127,7 +129,6 @@ async function getMonster(monsterSlug){
         console.log("Error connecting to API.",error)
         return 0}
 }
-
 function convertToCreature(monsterData) {
   const {
     slug,
@@ -142,6 +143,7 @@ function convertToCreature(monsterData) {
     legendary_actions = [],
     damage_resistances,
     damage_immunities,
+    damage_vulnerabilities, 
     condition_immunities,
     strength, dexterity, constitution, intelligence, wisdom, charisma,
     special_abilities = [],
@@ -151,10 +153,13 @@ function convertToCreature(monsterData) {
   // 1. Unificar acciones, hechizos y acciones legendarias
   const allActions = [
     ...actions,
-    ...spell_list.map(spell => ({
-      name: spell,
-      desc: `(Spell) Casts ${spell}`
-    })),
+    ...spell_list.map(spell => {
+      const slug = spell.replace("https://api.open5e.com/v2/spells/", "").replaceAll("/", "");
+      return {
+        name: slug,
+        desc: `<a href="https://dnd5e.wikidot.com/spell:${slug}" target="_blank">View spell on Wiki.</a>`,
+      };
+    }),
     ...(legendary_actions || []).map(la => ({
       name: la.name,
       desc: la.desc
@@ -183,15 +188,13 @@ function convertToCreature(monsterData) {
     }] : [])
   ];
 
-  // 4. Features: vacío por ahora (puede usarse para acciones especiales no en traits)
-  const features = [];
-
-  // 5. Resistencias e inmunidades como arrays (si son strings separados por `;` o `,`)
+  // 5. Resistencias, inmunidades y vulnerabilidades como arrays
   const resistances = parseDelimitedList(damage_resistances);
   const immunities = [
     ...parseDelimitedList(damage_immunities),
     ...parseDelimitedList(condition_immunities)
   ];
+  const vulnerabilities = parseDelimitedList(damage_vulnerabilities); 
 
   // 6. Crear instancia
   return new Creature({
@@ -205,8 +208,8 @@ function convertToCreature(monsterData) {
     stats,
     resistances,
     immunities,
+    vulnerabilities, 
     traits,
-    features,
     hit_dice
   });
 }
@@ -223,5 +226,4 @@ function parseDelimitedList(input) {
 //Funciones a realizar
 //Create homebrew creature
 //Eliminate homebrew creature
-//Filtrar Info del monstruo (Tal vez)
 export { Creature, creatureList, homebrewCreatureList, transformIntoSlug , searchMonster, getMonster, convertToCreature, parseDelimitedList }

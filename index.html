@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
     <meta charset="utf-8">
     <title>DnD Combat Helper</title>
     <style>
@@ -16,28 +20,39 @@
     </style>
   </head>
 
-  <body>
-    <header>
-      <h1>Dungeons & Dragons Combat Helper</h1>
-    </header>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Initiative</th>
-            <th>Name</th>
-            <th>Hp</th>
-            <th>AC</th>
-            <th>Current state & effects</th>
-          </tr>
-        </thead>
-        <button id="new_unit"> +New unit </button>
-        <button id="sort"> Sort </button>
-        <tbody id="table_stats">
-          <!-- Aquí se agregarán las filas dinámicamente -->
-        </tbody>
-      </table>
-    <script type="module" src="main.js" defer></script>
-  </body>
+    <body>
+        <header>
+            <h1>Dungeons & Dragons Combat Helper</h1>
+        </header>
+        <div id="container" style = "display: flex;">
+            <div id="table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Initiative</th>
+                            <th>Name</th>
+                            <th>Hp</th>
+                            <th>AC</th>
+                            <th>Current state & effects</th>
+                        </tr>
+                    </thead>
+                    <button id="new_unit"> +New unit </button>
+                    <button id="sort"> Sort </button>
+                    <button id="start_combat"> Start Combat </button>
+                    <button id="next"> Next </button>
+                    <tbody id="table_stats">
+                    <!-- Aquí se agregarán las filas dinámicamente -->
+                    </tbody>
+                </table>
+                <p>
+                    Round: <span id="current_round"> 1 </span></p>
+                </p>
+            </div>
+            <div id="creature_stats" style="margin-left: 20px; border-left: 1px solid #ccc; padding-left: 10px;">
+                <!--Info de la criatura -->
+            </div>
+        <script type="module" src="main.js" defer></script>        
+        </div>
+    </body>
 </html>
 

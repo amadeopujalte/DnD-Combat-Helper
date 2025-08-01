@@ -1,28 +1,33 @@
 import * as Creature from "./creature.js"
 
 class Unit{
-    constructor( name,hp, ac, initiative, dex){
+    constructor( name,hp, ac, initiative, dex, stateAndEffects){
         this.name = name
         this.hp = hp
         this.ac = ac
         this.initiative = initiative
         this.dex = dex
+        this.stateAndEffects = ""
     }
     modifyHp(value){
-        hp = value    
+        this.hp = value    
     }
     increaseHp(value){
-        hp += value
+        this.hp += value
     }
     decreaseHp(value){
-        hp -=value
+         this.hp -=value
     }
     modifyAc(value){
-        ac = value
+          this.ac = value
     }
-    modify(value){
-        initiative = value
+    modifyInitiative(value){
+        this.initiative = value
     }
+    modifyStateAndEffects(string){
+        this.stateAndEffects = string
+    }
+    
 
 }
 let combatList = []   // list of creatures in combat
@@ -30,14 +35,32 @@ let combatList = []   // list of creatures in combat
 function getCombatList(){
     return combatList
 }
+function compareIfPlayer(a,b){
+    if(a.name.includes("P.") && b.name.includes("P.")){
+        return b.initiative - a.initiative
+    }
+    else if(a.name.includes("P.")){
+        return b.initiativeRoll - a.initiative 
+    }
+    else{ return b.initiative - a.initiativeRoll}
+}
 function sortCombatList(){
-    combatList.sort((a,b) => { 
+    //console.log("combatList before: ", combatList)
+    combatList.sort((a,b) => {
+        if(a.initiative || b.initiative){
+            console.log("One is player")
+            return compareIfPlayer(a,b)
+        }
         if(b.initiativeRoll !== a.initiativeRoll){
+            console.log("Sorting two non players")
             return b.initiativeRoll - a.initiativeRoll
         }
-        else{ console.log(b.name, b.stats.dex, a.name, a.stats.dex)
+        else{
+             console.log("Sorting by dex in combatlist")
+             console.log(b.name, b.stats.dex, a.name, a.stats.dex)
              return Number(b.stats.dex) - Number(a.stats.dex)}  //se desempata por quien tiene mas dex
     })
+    console.log("Combat list after: " , combatList )
 }
 
 async function addMonsterToCombatList(monsterName){
@@ -59,15 +82,15 @@ function createUnits(){
         var index = combatList.length
         const e = combatList[index -1] //Also could use combatList.at(-1) but i dont like it.
         console.log("Element e is:",e)
-        const unit = new Unit(e.name, e.hp, e.ac, (e.initiative + e.d20()), e.stats.dex)
+        const unit = new Unit(e.name, e.hp, e.ac, (e.init + e.d20()), e.stats.dex)
         e.initiativeRoll = unit.initiative
         unitList.push(unit)
 }
 
 function sortUnitList(){
-    console.log(unitList)
+    //console.log("Unit List before: ", unitList)
     unitList = unitList.sort((a,b) => {
-        console.log(typeof b.dex, typeof a.dex)
+      //  console.log(typeof b.dex, typeof a.dex)
         if(b.initiative !== a.initiative){
             return b.initiative - a.initiative
         }
@@ -76,7 +99,7 @@ function sortUnitList(){
             return Number(b.dex) - Number(a.dex)}  //se desempata por quien tiene mas dex
     })
     console.log("sorting...")
-    console.log(unitList)
+    //console.log("UnitList after" , unitList)
 }
 async function newUnit(monsterName){
     const control = await addMonsterToCombatList(monsterName)

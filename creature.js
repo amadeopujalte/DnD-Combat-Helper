@@ -54,7 +54,7 @@ class Creature {
     this.vulnerabilities = vulnerabilities;
     this.traits = traits;
     this.hit_dice = hit_dice;
-    this.initiative = Math.floor((stats.dex-10)/2)
+    this.init = Math.floor((stats.dex-10)/2) //Initiative
     this.initiativeRoll
   }
     d20(){

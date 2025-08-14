@@ -364,7 +364,101 @@ document.querySelector("#table_stats").addEventListener("click", (event) => {
 
 })
 
-//En index, poder escribir en current state and effects Hecho!!
-//con la opcion de contador para cosas que necesiten turnos poder trackearlas. Not yet
-//Crear los homebrew
+function addAction() {
+  const container = document.getElementById("actions")
+  const div = document.createElement("div")
+  div.innerHTML = `
+    <input type="text" name="action_name" placeholder="Nombre de la acción">
+    <input type="text" name="action_desc" placeholder="Descripción">
+    `
+  container.appendChild(div)
+}
+
+function addLegendaryAction() {
+  const container = document.getElementById("legendary_actions")
+  const div = document.createElement("div")
+  div.innerHTML = `
+    <input type="text" name="legendary_name" placeholder="Nombre de legendary">
+    <input type="text" name="legendary_desc" placeholder="Descripción">
+  `
+  container.appendChild(div)
+}
+
+function addSpecialAbility() {
+  const container = document.getElementById("special_abilities")
+  const div = document.createElement("div")
+  div.innerHTML = `
+    <input type="text" name="ability_name" placeholder="Nombre habilidad especial">
+    <input type="text" name="ability_desc" placeholder="Descripción">
+  `
+  container.appendChild(div)
+}
+
+function addSpell() {
+  const container = document.getElementById("spell_list")
+  const input = document.createElement("input")
+  input.type = "text"
+  input.name = "spell_name"
+  input.placeholder = "Nombre del hechizo"
+  container.appendChild(input)
+}
+function addSense() {
+  const container = document.getElementById("senses")
+  const div = document.createElement("div")
+  div.innerHTML = `
+    <input type="text" name="sense_name" placeholder="Sense (e.g., darkvision)">
+    <input type="text" name="sense_value" placeholder="Value (e.g., 60 ft.)"><br>
+  `
+  container.appendChild(div)
+}
+
+
+document.getElementById("create_homebrew").addEventListener("click" , () =>{
+    const div = document.getElementById("create_homebrew_form")
+    div.style.display = "block"
+    document.getElementById("monster_form").addEventListener("click", (event) => {
+        const dynamicFieldId = event.target.id
+        switch(dynamicFieldId){
+            case "button_actions":
+                addAction()
+                break
+            case "button_legendary_actions":
+                addLegendaryAction()
+                break
+            case "button_special_abilities":
+                addSpecialAbility()
+                break
+            case "button_spells":
+                addSpell()
+                break
+            case "button_senses":
+                addSense()
+                break;
+        }
+    })
+    document.getElementById("submit").addEventListener( "click" , () =>{
+        const requiredFields = document.querySelectorAll("#monster_form [required]")
+        console.log(requiredFields)
+        const array = Array.from(requiredFields)
+        if(array.some( e => e.value == "")){
+            const missingFields = array.filter( e => e.value === "") 
+            alert("Missing required fields: (" + missingFields.map( e => e.name).join(",") + ")")
+        }
+        else{
+            //Hacer un chequeo de que el nombre no sea igual al de otro homebrew
+            const form = document.getElementById("monster_form")
+            const formData = new FormData(form)
+            Creature.createHomebrew(formData)
+            form.reset()
+            document.getElementById("create_homebrew_form").style.display = "none"
+            alert("monster added")
+
+        }
+    })
+    document.getElementById("cancel").addEventListener( "click", () =>{
+        const form = document.getElementById("monster_form")
+        form.reset()
+        document.getElementById("create_homebrew_form").style.display = "none"
+    }) 
+})
 

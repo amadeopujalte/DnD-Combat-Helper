@@ -34,6 +34,7 @@ The tool is currently in an active **development phase**, and already supports:
 Planned features include:
 
 - 🧪 Creating and saving homebrew monsters  
+- 🎲 Virtual dices (that can be used for regular rolls or to automatically add attack bonuses and do the damage for you!)
 - 🎨 Visual and UX improvements to make the tool more user-friendly
 
 ---

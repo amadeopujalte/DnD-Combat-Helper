@@ -129,6 +129,59 @@ async function getMonster(monsterSlug){
         console.log("Error connecting to API.",error)
         return 0}
 }
+
+
+//Save creature List
+//Save hombrew List
+
+function createHomebrew(info){
+
+let monster = {
+    slug: transformIntoSlug(info.get("name")),
+    name: info.get("name"),
+    type: info.get("type"),
+    hit_points: Number(info.get("hit_points")),
+    armor_class: Number(info.get("armor_class")),
+    hit_dice: info.get("hit_dice"),
+    speed: {
+        speed_walk: Number(info.get("speed_walk")),
+        speed_climb: Number(info.get("speed_climb")),
+        speed_fly: Number(info.get("speed_fly")),
+        speed_burrow: Number(info.get("speed_burrow"))
+    },
+    strength: Number(info.get("strength")),
+    dexterity: Number(info.get("dexterity")),
+    constitution: Number(info.get("constitution")),
+    intelligence: Number(info.get("intelligence")),
+    wisdom: Number(info.get("wisdom")),
+    charisma: Number(info.get("charisma")),
+    damage_resistances: info.getAll("damage_resistances"),
+    damage_immunities: info.getAll("damage_immunities"),
+    damage_vulnerabilities: info.getAll("damage_vulnerabilities"),
+    condition_immunities: info.getAll("condition_immunities"),
+    senses: info.getAll("senses"),
+
+    actions: info.getAll("action_name").map((name, i) => ({
+        name: name,
+        desc: info.getAll("action_desc")[i]
+    })),
+
+    legendary_actions: info.getAll("legendary_action_name").map((name, i) => ({
+        name: name,
+        desc: info.getAll("legendary_action_desc")[i]
+    })),
+
+    special_abilities: info.getAll("special_ability_name").map((name, i) => ({
+        name: name,
+        desc: info.getAll("special_ability_desc")[i]
+    })),
+    spell_list: info.getAll("spell_name")
+    }
+    const homebrew = convertToCreature(monster)
+    homebrewCreatureList.push(homebrew)
+    console.log(homebrewCreatureList)
+}
+
 function convertToCreature(monsterData) {
   const {
     slug,
@@ -226,4 +279,4 @@ function parseDelimitedList(input) {
 //Funciones a realizar
 //Create homebrew creature
 //Eliminate homebrew creature
-export { Creature, creatureList, homebrewCreatureList, transformIntoSlug , searchMonster, getMonster, convertToCreature, parseDelimitedList }
+export { Creature, creatureList, homebrewCreatureList, createHomebrew, transformIntoSlug , searchMonster, getMonster, convertToCreature, parseDelimitedList }

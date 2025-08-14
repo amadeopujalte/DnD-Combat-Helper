@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+    <link rel="manifest" href="assets/site.webmanifest">
     <meta charset="utf-8">
     <title>DnD Combat Helper</title>
     <style>
@@ -49,9 +49,144 @@
                 <p>
                     Round: <span id="current_round"> 1 </span></p>
                 </p>
+                <button id="create_homebrew"> Create hombrew creature </button>
             </div>
+
             <div id="creature_stats" style="margin-left: 20px; border-left: 1px solid #ccc; padding-left: 10px;">
                 <!--Info de la criatura -->
+            </div>
+            <div id="create_homebrew_form" style = "display: none">
+                <form id="monster_form">
+                    <h2>Create Custom Monster</h2>
+                    <!-- Basic fields -->
+                    <label>Name: <input type="text"  name="name" required></label><br>
+                    <small style="color: red;"> Do not name the creature as a known monster in D&D (or add a tag to it like "h.")</small><br>
+                    <label>Type: <input type="text" name="type"></label><br>
+                    <label>Hit Points: <input type="number" name="hit_points" required></label><br>
+                    <label>Armor Class: <input type="number" name="armor_class" required></label><br>
+                    <label>Hit Dice: <input type="text" name="hit_dice"></label><br>
+
+                    <!-- Speed -->
+                    <h3>Speed</h3>
+                    <label>Walk: <input type="text" name="speed_walk" placeholder="e.g. 30 ft." required></label><br>
+                    <label>Fly: <input type="text" name="speed_fly" placeholder="e.g. 60 ft." ></label><br>
+                    <label>Climb: <input type="text" name="speed_climb" placeholder="e.g. 20 ft."></label><br>
+                    <label>Burrow: <input type="text" name="speed_burrow" placeholder="e.g. 10ft."></label><br>
+                    <!-- Stats -->
+                    <h3>Ability Scores</h3>
+                    <label>STR: <input type="number" name="strength" required> </label>
+                    <label>DEX: <input type="number" name="dexterity" required></label>
+                    <label>CON: <input type="number" name="constitution" required></label><br>
+                    <label>INT: <input type="number" name="intelligence" required></label>
+                    <label>WIS: <input type="number" name="wisdom" required></label>
+                    <label>CHA: <input type="number" name="charisma" required></label><br>
+                    
+                    <!-- Damage resistances -->
+                    <h3>Damage Resistances</h3>
+                    <div id="damage_resistances">
+                        <label><input type="checkbox" name="damage_resistances" value="bludgeoning"> Bludgeoning</label>
+                        <label><input type="checkbox" name="damage_resistances" value="piercing"> Piercing</label>
+                        <label><input type="checkbox" name="damage_resistances" value="slashing"> Slashing</label>
+                        <label><input type="checkbox" name="damage_resistances" value="fire"> Fire</label>
+                        <label><input type="checkbox" name="damage_resistances" value="cold"> Cold</label>
+                        <label><input type="checkbox" name="damage_resistances" value="lightning"> Lightning</label><br>
+                        <label><input type="checkbox" name="damage_resistances" value="thunder"> Thunder</label><br>
+                        <label><input type="checkbox" name="damage_resistances" value="acid"> Acid</label><br>
+                        <label><input type="checkbox" name="damage_resistances" value="poison"> Poison</label><br>
+                        <label><input type="checkbox" name="damage_resistances" value="necrotic"> Necrotic</label><br>
+                        <label><input type="checkbox" name="damage_resistances" value="radiant"> Radiant</label><br>
+                        <label><input type="checkbox" name="damage_resistances" value="force"> Force</label><br>
+                        <label><input type="checkbox" name="damage_resistances" value="psychic"> Psychic</label><br>
+                        <label><input type="checkbox" name="damage_resistances" value="magical"> Magical attacks</label><br>
+                        <label><input type="checkbox" name="damage_resistances" value="nonMagical"> nonMagical attacks</label><br>
+                        
+
+                    </div>
+
+
+
+                    <!-- Damage immunities -->
+                    <h3>Damage Immunities</h3>
+                    <div id="damage_immunities">
+                        <label><input type="checkbox" name="damage_immunities" value="bludgeoning"> Bludgeoning</label>
+                        <label><input type="checkbox" name="damage_immunities" value="piercing"> Piercing</label>
+                        <label><input type="checkbox" name="damage_immunities" value="slashing"> Slashing</label>
+                        <label><input type="checkbox" name="damage_immunities" value="fire"> Fire</label>
+                        <label><input type="checkbox" name="damage_immunities" value="cold"> Cold</label>
+                        <label><input type="checkbox" name="damage_immunities" value="lightning"> Lightning</label><br>
+                        <label><input type="checkbox" name="damage_immunities" value="thunder"> Thunder</label><br>
+                        <label><input type="checkbox" name="damage_immunities" value="acid"> Acid</label><br>
+                        <label><input type="checkbox" name="damage_immunities" value="poison"> Poison</label><br>
+                        <label><input type="checkbox" name="damage_immunities" value="necrotic"> Necrotic</label><br>
+                        <label><input type="checkbox" name="damage_immunities" value="radiant"> Radiant</label><br>
+                        <label><input type="checkbox" name="damage_immunities" value="force"> Force</label><br>
+                        <label><input type="checkbox" name="damage_immunities" value="psychic"> Psychic</label><br>
+                        <label><input type="checkbox" name="damage_immunities" value="magical"> Magical attacks</label><br>
+                        <label><input type="checkbox" name="damage_immunities" value="nonMagical"> nonMagical attacks</label><br>
+                        
+
+                    </div>
+                    <!-- Damage vulnerabilities -->
+                    <h3>Damage Vulnerabilities</h3>
+                    <div id="damage_vulnerabilities">
+                        <label><input type="checkbox" name="damage_vulnerabilities" value="bludgeoning"> Bludgeoning</label>
+                        <label><input type="checkbox" name="damage_vulnerabilities" value="piercing"> Piercing</label>
+                        <label><input type="checkbox" name="damage_vulnerabilities" value="slashing"> Slashing</label>
+                        <label><input type="checkbox" name="damage_vulnerabilities" value="fire"> Fire</label>
+                        <label><input type="checkbox" name="damage_vulnerabilities" value="cold"> Cold</label>
+                        <label><input type="checkbox" name="damage_vulnerabilities" value="lightning"> Lightning</label><br>
+                        <label><input type="checkbox" name="damage_vulnerabilities" value="thunder"> Thunder</label><br>
+                        <label><input type="checkbox" name="damage_vulnerabilities" value="acid"> Acid</label><br>
+                        <label><input type="checkbox" name="damage_vulnerabilities" value="poison"> Poison</label><br>
+                        <label><input type="checkbox" name="damage_vulnerabilities" value="necrotic"> Necrotic</label><br>
+                        <label><input type="checkbox" name="damage_vulnerabilities" value="radiant"> Radiant</label><br>
+                        <label><input type="checkbox" name="damage_vulnerabilities" value="force"> Force</label><br>
+                        <label><input type="checkbox" name="damage_vulnerabilities" value="psychic"> Psychic</label><br>
+                        <label><input type="checkbox" name="damage_vulnerabilities" value="magical"> Magical attacks</label><br>
+                        <label><input type="checkbox" name="damage_vulnerabilities" value="nonMagical"> nonMagical attacks</label><br>
+                    </div>
+
+                    <!-- Condition immunities -->
+                    <h3>Condition Immunities</h3>
+                    <div id="condition_immunities">
+                        <label><input type="checkbox" name="condition_immunities" value="blinded"> Blinded</label><br>
+                        <label><input type="checkbox" name="condition_immunities" value="charmed"> Charmed</label><br>
+                        <label><input type="checkbox" name="condition_immunities" value="deafened"> Deafened</label><br>
+                        <label><input type="checkbox" name="condition_immunities" value="frightened"> Frightened</label><br>
+                        <label><input type="checkbox" name="condition_immunities" value="grappled"> Grappled</label><br>
+                        <label><input type="checkbox" name="condition_immunities" value="incapacitated"> Incapacitated</label><br>
+                        <label><input type="checkbox" name="condition_immunities" value="paralyzed"> Paralyzed</label><br>
+                        <label><input type="checkbox" name="condition_immunities" value="petrified"> Petrified</label><br>
+                        <label><input type="checkbox" name="condition_immunities" value="poisoned"> Poisoned</label><br>
+                        <label><input type="checkbox" name="condition_immunities" value="prone"> Prone</label><br>
+                        <label><input type="checkbox" name="condition_immunities" value="restrained"> Restrained</label><br>
+                        <label><input type="checkbox" name="condition_immunities" value="stunned"> Stunned</label><br>
+                        <label><input type="checkbox" name="condition_immunities" value="exhaustion"> Exhaustion</label><br>
+                    </div>
+
+                    <!-- Dynamic fields -->
+                    <h3>Actions</h3>
+                    <div id="actions"></div>
+                    <button type="button" id= "button_actions"> + Add Action</button>
+
+                    <h3>Legendary Actions</h3>
+                    <div id="legendary_actions"></div>
+                    <button type="button" id="button_legendary_actions">+ Add Legendary Action</button>
+
+                    <h3>Special Abilities</h3>
+                    <div id="special_abilities"></div>
+                    <button type="button" id="button_special_abilities">+ Add Special Ability</button>
+
+                    <h3>Spell List</h3>
+                    <div id="spell_list"></div>
+                    <button type="button" id="button_spells">+ Add Spell</button>
+                    <h3>Senses</h3>
+                    <div id="senses"></div>
+                    <button type="button" id="button_senses">+ Add Sense</button>
+                    <br><br>
+                    <button type="button" id="submit">Save Monster</button>
+                    <button type="button" id="cancel">Cancel</button>
+                </form>
             </div>
         <script type="module" src="main.js" defer></script>        
         </div>

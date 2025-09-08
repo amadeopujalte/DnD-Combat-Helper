@@ -93,10 +93,10 @@ function renderCreatureInfo(index){
         type.textContent = "Type: " + creature.type
 
         const hp = document.createElement("p")
-        hp.textContent = "HP: " + creature.hp
+        hp.textContent = "HP: " + creature.hit_points
 
         const ac = document.createElement("p")
-        ac.textContent = "AC: " + creature.ac
+        ac.textContent = "AC: " + creature.armor_class
 
         const hitDice = document.createElement("p")
         hitDice.textContent = "Hit Dice: " + creature.hit_dice
@@ -109,9 +109,9 @@ function renderCreatureInfo(index){
         speed.textContent = `Speed: Walk ${s.walk}, Swim ${s.swim}, Burrow ${s.burrow}, Fly ${s.fly}`
     
         const actions = document.createElement("p")
-        actions.innerHTML = "Actions: <br>"
+        actions.innerHTML =  "Actions: <br>"
         creature.actions.forEach(action => {
-            actions.innerHTML += `${action.name}:<br>`
+            actions.innerHTML += ` <b> ${action.name}: </b> <br>`
             actions.innerHTML += `${action.desc}<br>` //La desc contiene tambien el atk bonus y damage dice
         })
     
@@ -133,8 +133,11 @@ function renderCreatureInfo(index){
 
         const stats = document.createElement("p")
         const st = creature.stats
-        stats.textContent = `Stats: STR ${st.str} (${(Math.floor((st.str - 10) / 2) >= 0 ? '+' : '') + Math.floor((st.str - 10) / 2)}), DEX ${st.dex} (${(Math.floor((st.dex - 10) / 2) >= 0 ? '+' : '') + Math.floor((st.dex - 10) / 2)}), CON ${st.con} (${(Math.floor((st.con - 10) / 2) >= 0 ? '+' : '') + Math.floor((st.con - 10) / 2)}), INT ${st.int} (${(Math.floor((st.int - 10) / 2) >= 0 ? '+' : '') + Math.floor((st.int - 10) / 2)}), WIS ${st.wis} (${(Math.floor((st.wis - 10) / 2) >= 0 ? '+' : '') + Math.floor((st.wis - 10) / 2)}), CHA ${st.cha} (${(Math.floor((st.cha - 10) / 2) >= 0 ? '+' : '') + Math.floor((st.cha - 10) / 2)})` 
-    
+        stats.textContent = `Stats: STR ${st.strength} (${(Math.floor((st.strength - 10) / 2) >= 0 ? '+' : '') + Math.floor((st.strength - 10) / 2)}), DEX ${st.dexterity} (${(Math.floor((st.dexterity - 10) / 2) >= 0 ? '+' : '') + Math.floor((st.dexterity - 10) / 2)}), CON ${st.constitution} (${(Math.floor((st.constitution - 10) / 2) >= 0 ? '+' : '') + Math.floor((st.constitution - 10) / 2)}), INT ${st.intelligence} (${(Math.floor((st.intelligence - 10) / 2) >= 0 ? '+' : '') + Math.floor((st.intelligence - 10) / 2)}), WIS ${st.wisdom} (${(Math.floor((st.wisdom - 10) / 2) >= 0 ? '+' : '') + Math.floor((st.wisdom - 10) / 2)}), CHA ${st.charisma} (${(Math.floor((st.charisma - 10) / 2) >= 0 ? '+' : '') + Math.floor((st.charisma - 10) / 2)})` 
+        
+        const saves = document.createElement("p")
+        saves.textContent = `Saves: Str (${creature.saves.strength_save >= 0 ? '+' + creature.saves.strength_save : creature.saves.strength_save}), Dex (${creature.saves.dexterity_save >= 0 ? '+' + creature.saves.dexterity_save : creature.saves.dexterity_save}), Con(${creature.saves.constitution_save >= 0 ? '+' + creature.saves.constitution_save : creature.saves.constitution_save}), Int(${creature.saves.intelligence_save >= 0 ? '+' + creature.saves.intelligence_save : creature.saves.intelligence_save}), Wis(${creature.saves.wisdom_save >= 0 ? '+' + creature.saves.wisdom_save : creature.saves.wisdom_save}), Cha(${creature.saves.charisma_save >= 0 ? '+' + creature.saves.charisma_save : creature.saves.charisma_save})`
+
         block.appendChild(name)
         block.appendChild(type)
         block.appendChild(hp)
@@ -148,6 +151,7 @@ function renderCreatureInfo(index){
         block.appendChild(immunities)
         block.appendChild(traits)
         block.appendChild(stats)
+        block.appendChild(saves)
         console.log("rendering creature stats")
     }
 }
@@ -323,7 +327,8 @@ document.querySelector("#table_stats").addEventListener("click", (event) => {
                 renderTable()
             }
         })
-    } else {
+    }
+    else {
         function applyEdit(value) {
             if (!isNaN(value)) {
                 const number = parseInt(value)
@@ -342,10 +347,13 @@ document.querySelector("#table_stats").addEventListener("click", (event) => {
                             Unit.unitList[index].modifyAc(number)
                             break
                     }
-                } else {
-                    alert("Invalid number, cannot be below 0")
-                }
-            } else {
+                } 
+                else {alert("Invalid number, cannot be below 0")}   
+            } 
+            else if(field == "name"){
+                Unit.unitList[index].modifyName(value)
+            }
+            else {
                 Unit.unitList[index].modifyStateAndEffects(value)
             }
             renderTable()
@@ -412,6 +420,20 @@ function addSense() {
   container.appendChild(div)
 }
 
+document.getElementById("eliminate_homebrew").addEventListener( "click", () =>{
+        const input = document.createElement("input")
+        input.type = "text"
+        input.placeholder = "Homebrew's name"
+        document.getElementById("eliminate_homebrew").appendChild(input)
+        input.focus()
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                const monsterName = input.value
+                input.remove()
+                Creature.removeHomebrew(monsterName)
+            }
+        })
+    })
 
 document.getElementById("create_homebrew").addEventListener("click" , () =>{
     const div = document.getElementById("create_homebrew_form")
@@ -436,7 +458,7 @@ document.getElementById("create_homebrew").addEventListener("click" , () =>{
                 break;
         }
     })
-    document.getElementById("submit").addEventListener( "click" , () =>{
+document.getElementById("submit").addEventListener( "click" , () =>{
         const requiredFields = document.querySelectorAll("#monster_form [required]")
         console.log(requiredFields)
         const array = Array.from(requiredFields)
@@ -445,14 +467,18 @@ document.getElementById("create_homebrew").addEventListener("click" , () =>{
             alert("Missing required fields: (" + missingFields.map( e => e.name).join(",") + ")")
         }
         else{
-            //Hacer un chequeo de que el nombre no sea igual al de otro homebrew
-            const form = document.getElementById("monster_form")
-            const formData = new FormData(form)
-            Creature.createHomebrew(formData)
-            form.reset()
-            document.getElementById("create_homebrew_form").style.display = "none"
-            alert("monster added")
-
+            const nameInput = document.querySelector('#monster_form input[name = "name"]')
+            if(Creature.homebrewCreatureList.some(e => e.name == nameInput.value)){
+                alert("Homebrew with this name already exists")
+            }
+            else{
+                const form = document.getElementById("monster_form")
+                const formData = new FormData(form)
+                Creature.createHomebrew(formData)
+                form.reset()
+                document.getElementById("create_homebrew_form").style.display = "none"
+                alert("monster added")
+        }
         }
     })
     document.getElementById("cancel").addEventListener( "click", () =>{
@@ -462,3 +488,22 @@ document.getElementById("create_homebrew").addEventListener("click" , () =>{
     }) 
 })
 
+window.addEventListener("beforeunload", () => {
+    localStorage.setItem("homebrewList", JSON.stringify(Creature.homebrewCreatureList))
+    localStorage.setItem("creatureList", JSON.stringify(Creature.creatureList))
+})
+
+//Both lists should start empty or else this may duplicate items
+window.addEventListener("DOMContentLoaded", () => {
+    const hbl = JSON.parse(localStorage.getItem("homebrewList"))
+    const cl = JSON.parse(localStorage.getItem("creatureList"))
+
+    if(hbl){
+        const convertedHbl = hbl.map(e => Creature.convertToCreature(e))
+        Creature.homebrewCreatureList.push(...convertedHbl)
+    }
+    if(cl){ 
+        const convertedCl = cl.map(e => Creature.convertToCreature(e))
+        Creature.creatureList.push(...convertedCl)
+    }
+})

@@ -50,12 +50,13 @@
                     Round: <span id="current_round"> 1 </span></p>
                 </p>
                 <button id="create_homebrew"> Create hombrew creature </button>
+                <button id="eliminate_homebrew"> Eliminate homebrew creature </button>
             </div>
 
             <div id="creature_stats" style="margin-left: 20px; border-left: 1px solid #ccc; padding-left: 10px;">
                 <!--Info de la criatura -->
             </div>
-            <div id="create_homebrew_form" style = "display: none">
+            <div id="create_homebrew_form" style = "display: none;">
                 <form id="monster_form">
                     <h2>Create Custom Monster</h2>
                     <!-- Basic fields -->
@@ -80,7 +81,15 @@
                     <label>INT: <input type="number" name="intelligence" required></label>
                     <label>WIS: <input type="number" name="wisdom" required></label>
                     <label>CHA: <input type="number" name="charisma" required></label><br>
-                    
+                     
+                    <h3>Saves</h3>
+                    <label>STR: <input type="number" name="strSave" required> </label>
+                    <label>DEX: <input type="number" name="dexSave" required></label>
+                    <label>CON: <input type="number" name="conSave" required></label><br>
+                    <label>INT: <input type="number" name="intSave" required></label>
+                    <label>WIS: <input type="number" name="wisSave" required></label>
+                    <label>CHA: <input type="number" name="chaSave" required></label><br>
+ 
                     <!-- Damage resistances -->
                     <h3>Damage Resistances</h3>
                     <div id="damage_resistances">
@@ -180,6 +189,7 @@
                     <h3>Spell List</h3>
                     <div id="spell_list"></div>
                     <button type="button" id="button_spells">+ Add Spell</button>
+                    <small style="color: red;"> Must be a real spell.</small><br>
                     <h3>Senses</h3>
                     <div id="senses"></div>
                     <button type="button" id="button_senses">+ Add Sense</button>

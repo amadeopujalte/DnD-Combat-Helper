@@ -9,6 +9,10 @@ class Unit{
         this.dex = dex
         this.stateAndEffects = ""
     }
+
+    modifyName(name){
+        this.name = name
+    }
     modifyHp(value){
         this.hp = value    
     }
@@ -57,8 +61,8 @@ function sortCombatList(){
         }
         else{
              console.log("Sorting by dex in combatlist")
-             console.log(b.name, b.stats.dex, a.name, a.stats.dex)
-             return Number(b.stats.dex) - Number(a.stats.dex)}  //se desempata por quien tiene mas dex
+             console.log(b.name, b.stats.dexterity, a.name, a.stats.dexterity)
+             return Number(b.stats.dexterity) - Number(a.stats.dexterity)}  //se desempata por quien tiene mas dex
     })
     console.log("Combat list after: " , combatList )
 }
@@ -82,7 +86,7 @@ function createUnits(){
         var index = combatList.length
         const e = combatList[index -1] //Also could use combatList.at(-1) but i dont like it.
         console.log("Element e is:",e)
-        const unit = new Unit(e.name, e.hp, e.ac, (e.init + e.d20()), e.stats.dex)
+        const unit = new Unit(e.name, e.hit_points, e.armor_class, (e.init + e.d20()), e.stats.dexterity)
         e.initiativeRoll = unit.initiative
         unitList.push(unit)
 }

@@ -21,11 +21,12 @@ class Creature {
     slug,    
     name,
     type,
-    hp,
-    ac,
+    hit_points,
+    armor_class,
     speed,         // Esperado: { walk, swim, burrow, fly }
     actions = [],
-    stats,         // { str, dex, con, int, wis, cha }
+    stats,// { str, dex, con, int, wis, cha }
+    saves,
     resistances = [],
     immunities = [],
     vulnerabilities = [],
@@ -36,8 +37,8 @@ class Creature {
     this.slug = slug;
     this.name = name;
     this.type = type;
-    this.hp = hp;
-    this.ac = ac;
+    this.hit_points = hit_points;
+    this.armor_class = armor_class;
 
     // Velocidades individuales (null si no tiene)
     this.speed = {
@@ -45,16 +46,17 @@ class Creature {
       swim: speed.swim || 0,
       burrow: speed.burrow || 0,
       fly: speed.fly || 0
-    };
+    }
 
-    this.actions = actions;
-    this.stats = stats;
-    this.resistances = resistances;
-    this.immunities = immunities;
-    this.vulnerabilities = vulnerabilities;
-    this.traits = traits;
-    this.hit_dice = hit_dice;
-    this.init = Math.floor((stats.dex-10)/2) //Initiative
+    this.actions = actions
+    this.stats = stats
+    this.saves = saves
+    this.resistances = resistances
+    this.immunities = immunities
+    this.vulnerabilities = vulnerabilities
+    this.traits = traits
+    this.hit_dice = hit_dice
+    this.init = Math.floor((stats.dexterity-10)/2) //Initiative
     this.initiativeRoll
   }
     d20(){
@@ -84,8 +86,8 @@ class Creature {
         }
 
     getRandomIntInclusive(min, max) {
-        const minCeiled = Math.ceil(min);
-        const maxFloored = Math.floor(max);
+        const minCeiled = Math.ceil(min)
+        const maxFloored = Math.floor(max)
         return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); // The maximum is inclusive and the minimum is inclusive
     }
 }
@@ -94,7 +96,7 @@ let creatureList = []
 let homebrewCreatureList = []
 
 function transformIntoSlug(monsterName){
-    var slug =  monsterName.toLowerCase().replace(' ', '-')
+    var slug =  monsterName.toLowerCase().replaceAll(' ', '-')
     return slug
 }
 async function searchMonster(monsterName){
@@ -103,6 +105,7 @@ async function searchMonster(monsterName){
     monster =  creatureList.find(p => p.slug === monsterSlug) || homebrewCreatureList.find(p => p.slug === monsterSlug)
     if(!monster){
             monster = await getMonster(monsterSlug)
+            console.log("monster is:" , monster)
             if(monster!== 0){
             // Adapta los monstruos extraidos del fecth a los datos de la clase Creature para poder usar cosas como iniative.
                 monster = convertToCreature(monster)
@@ -113,6 +116,7 @@ async function searchMonster(monsterName){
         }
 
 async function getMonster(monsterSlug){
+    console.log("getting monster by api")
     try{
     const response = await fetch(`https://api.open5e.com/v1/monsters/${monsterSlug}/`)
     var data = await response.json()
@@ -155,6 +159,14 @@ let monster = {
     intelligence: Number(info.get("intelligence")),
     wisdom: Number(info.get("wisdom")),
     charisma: Number(info.get("charisma")),
+    saves:{
+        strenght_save: Number(info.get("strength_save")),
+        dexteruty_save: Number(info.get("dexterity_save")),
+        constitution_save: Number(info.get("constitution_save")),
+        intelligence_save: Number(info.get("intelligence_save")),
+        wisdom_save: Number(info.get("wisdom_save")),
+        charisma_save: Number(info.get("charisma_save")),
+    },
     damage_resistances: info.getAll("damage_resistances"),
     damage_immunities: info.getAll("damage_immunities"),
     damage_vulnerabilities: info.getAll("damage_vulnerabilities"),
@@ -182,6 +194,18 @@ let monster = {
     console.log(homebrewCreatureList)
 }
 
+function removeHomebrew(homebrewName){
+    console.log(homebrewCreatureList)
+    var index = homebrewCreatureList.findIndex(e => e.name == homebrewName)
+    if(index != -1){
+        homebrewCreatureList.splice(index,1)
+        alert("Homebrew Eliminated")
+        console.log(homebrewCreatureList)
+    }
+    else{
+        alert(`Homebrew named : ${homebrewName} doesnt exist`)
+    }
+}
 function convertToCreature(monsterData) {
   const {
     slug,
@@ -199,11 +223,12 @@ function convertToCreature(monsterData) {
     damage_vulnerabilities, 
     condition_immunities,
     strength, dexterity, constitution, intelligence, wisdom, charisma,
+    strength_save, dexterity_save, constitution_save, intelligence_save, wisdom_save, charisma_save,
     special_abilities = [],
     senses = ""
   } = monsterData;
 
-  // 1. Unificar acciones, hechizos y acciones legendarias
+    // 1. Unificar acciones, hechizos y acciones legendarias
   const allActions = [
     ...actions,
     ...spell_list.map(spell => {
@@ -220,15 +245,51 @@ function convertToCreature(monsterData) {
   ];
 
   // 2. Construir stats
-  const stats = {
-    str: strength,
-    dex: dexterity,
-    con: constitution,
-    int: intelligence,
-    wis: wisdom,
-    cha: charisma
-  };
+    let stats
+        if(monsterData.stats){
+             stats = {
+                strength: Number(monsterData.stats.strength),
+                dexterity: Number(monsterData.stats.dexterity),
+                constitution: Number(monsterData.stats.constitution),
+                intelligence: Number(monsterData.stats.intelligence),
+                wisdom: Number(monsterData.stats.wisdom),
+                charisma: Number(monsterData.stats.charisma)
+        }
+    }
+        else{
+             stats = {
+                strength: Number(strength),
+                dexterity: Number(dexterity),
+                constitution: Number(constitution),
+                intelligence: Number(intelligence),
+                wisdom: Number(wisdom),
+                charisma: Number(charisma)
+        }
+    }
 
+    //Saves
+    let saves
+    if(monsterData.saves){
+         saves = {
+            strength_save: Number(monsterData.saves.strength_save),
+            dexterity_save: Number(monsterData.saves.dexterity_save),
+            constitution_save: Number(monsterData.saves.constitution_save),
+            intelligence_save: Number(monsterData.saves.intelligence_save),
+            wisdom_save: Number(monsterData.saves.wisdom_save),
+            charisma_save: Number(monsterData.saves.charisma_save),
+    }
+    }
+    else{
+         saves = {
+            strength_save: Number(strength_save),
+            dexterity_save: Number(dexterity_save),
+            constitution_save: Number(constitution_save),
+            intelligence_save: Number(intelligence_save),
+            wisdom_save: Number(wisdom_save),
+            charisma_save: Number(charisma_save),
+    }
+
+    }
   // 3. Traits: convertir special_abilities y senses
   const traits = [
     ...(special_abilities || []).map(t => ({
@@ -254,11 +315,12 @@ function convertToCreature(monsterData) {
     slug,
     name,
     type,
-    hp: hit_points,
-    ac: armor_class,
+    hit_points: Number(hit_points),
+    armor_class: Number(armor_class),
     speed,
     actions: allActions,
     stats,
+    saves,
     resistances,
     immunities,
     vulnerabilities, 
@@ -276,7 +338,4 @@ function parseDelimitedList(input) {
     .filter(s => s.length > 0);
 } 
  
-//Funciones a realizar
-//Create homebrew creature
-//Eliminate homebrew creature
-export { Creature, creatureList, homebrewCreatureList, createHomebrew, transformIntoSlug , searchMonster, getMonster, convertToCreature, parseDelimitedList }
+export { Creature, creatureList, homebrewCreatureList, createHomebrew, removeHomebrew, transformIntoSlug , searchMonster, getMonster, convertToCreature, parseDelimitedList }

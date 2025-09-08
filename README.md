@@ -21,19 +21,16 @@ The app is built to:
 ## 🚧 Development Status
 
 The tool is currently in an active **development phase**, and already supports:
-
 - ✅ Creating and running a full combat sequence  
 - ✅ Viewing monster stats during their respective turns  
 - ✅ Adding player characters to the initiative tracker  
 - ✅ Editing combat table entries (name, HP, AC, etc.)
+- ✅ Creating and saving homebrew monsters
 
 ---
 
 ## 🧩 Coming Soon
-
-Planned features include:
-
-- 🧪 Creating and saving homebrew monsters  
+Planned features include:  
 - 🎲 Virtual dices (that can be used for regular rolls or to automatically add attack bonuses and do the damage for you!)
 - 🎨 Visual and UX improvements to make the tool more user-friendly
 

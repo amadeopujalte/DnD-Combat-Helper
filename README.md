@@ -38,7 +38,7 @@ Planned features include:
 
 ## 💡 Notes
 
-- 🖥️ For now, the tool is intended to be used **locally** via a simple development server (e.g. using Python, Node.js, or VS Code Live Server).  
+- 🖥️ The tool is intended to be released publicly through GitHub Pages. but for now, it can be used **locally** via a simple development server (e.g. using Python, Node.js, or VS Code Live Server).  
 - 🧭 This project is inspired by the **D&D Beyond Combat Tracker**, but aims for a **simpler, more streamlined interface**.  
 - 🛠️ It is also a **learning project** for web development—focused on practicing JavaScript, DOM manipulation, and dynamic UI generation.  
 - **Hope you like it! 😊**

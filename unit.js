@@ -1,13 +1,13 @@
 import * as Creature from "./creature.js"
 
 class Unit{
-    constructor( name,hp, ac, initiative, dex, stateAndEffects){
+    constructor( name,hp, ac, initiative, dex){
         this.name = name
         this.hp = hp
         this.ac = ac
         this.initiative = initiative
         this.dex = dex
-        this.stateAndEffects = ""
+        this.stateAndEffects = []
     }
 
     modifyName(name){
@@ -28,8 +28,14 @@ class Unit{
     modifyInitiative(value){
         this.initiative = value
     }
-    modifyStateAndEffects(string){
-        this.stateAndEffects = string
+    modifyStateAndEffects(form){
+       const effect = {
+            condition: form.get("effect"),
+            endsAt: form.get("endsAt"), // || ""
+            creature: form.get("creature"),
+            duration: form.get("rounds")
+        }
+        this.stateAndEffects.push(effect)
     }
     
 
@@ -49,7 +55,6 @@ function compareIfPlayer(a,b){
     else{ return b.initiative - a.initiativeRoll}
 }
 function sortCombatList(){
-    //console.log("combatList before: ", combatList)
     combatList.sort((a,b) => {
         if(a.initiative || b.initiative){
             console.log("One is player")
@@ -64,7 +69,6 @@ function sortCombatList(){
              console.log(b.name, b.stats.dexterity, a.name, a.stats.dexterity)
              return Number(b.stats.dexterity) - Number(a.stats.dexterity)}  //se desempata por quien tiene mas dex
     })
-    console.log("Combat list after: " , combatList )
 }
 
 async function addMonsterToCombatList(monsterName){
@@ -85,14 +89,13 @@ let unitList = []
 function createUnits(){
         var index = combatList.length
         const e = combatList[index -1] //Also could use combatList.at(-1) but i dont like it.
-        console.log("Element e is:",e)
+      //  console.log("Element e is:",e)
         const unit = new Unit(e.name, e.hit_points, e.armor_class, (e.init + e.d20()), e.stats.dexterity)
         e.initiativeRoll = unit.initiative
         unitList.push(unit)
 }
 
 function sortUnitList(){
-    //console.log("Unit List before: ", unitList)
     unitList = unitList.sort((a,b) => {
       //  console.log(typeof b.dex, typeof a.dex)
         if(b.initiative !== a.initiative){
@@ -103,7 +106,6 @@ function sortUnitList(){
             return Number(b.dex) - Number(a.dex)}  //se desempata por quien tiene mas dex
     })
     console.log("sorting...")
-    //console.log("UnitList after" , unitList)
 }
 async function newUnit(monsterName){
     const control = await addMonsterToCombatList(monsterName)

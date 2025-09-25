@@ -1,30 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
-    <link rel="manifest" href="assets/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon_io/favicon-16x16.png">
+    <link rel="manifest" href="assets/favicon_io/site.webmanifest">
+    <link rel="stylesheet" href="style.css"> 
     <meta charset="utf-8">
     <title>DnD Combat Helper</title>
-    <style>
-      table {
-        width: 60%;
-        border: 1px solid black;
-        border-collapse: collapse;
-      }
-      th, td {
-        border: 1px solid black;
-        padding: 10px;
-      }
-    </style>
-  </head>
+    </head>
 
     <body>
         <header>
-            <h1>Dungeons & Dragons Combat Helper</h1>
         </header>
-        <div id="container" style = "display: flex;">
+        <div id="container">
             <div id="table">
                 <table>
                     <thead>
@@ -34,6 +23,7 @@
                             <th>Hp</th>
                             <th>AC</th>
                             <th>Current state & effects</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <button id="new_unit"> +New unit </button>
@@ -46,23 +36,28 @@
                     <!-- Aquí se agregarán las filas dinámicamente -->
                     </tbody>
                 </table>
-                <p>
+                <p id = "round_counter">
                     Round: <span id="current_round"> 1 </span></p>
                 </p>
-                <button id="create_homebrew"> Create hombrew creature </button>
+                <button id="create_homebrew"> Create homebrew creature </button>
                 <button id="eliminate_homebrew"> Eliminate homebrew creature </button>
             </div>
 
-            <div id="creature_stats" style="margin-left: 20px; border-left: 1px solid #ccc; padding-left: 10px;">
-                <!--Info de la criatura -->
-            </div>
-            <div id="create_homebrew_form" style = "display: none;">
+            <div id="creature_stats">
+                <div id = "current_statBlock">
+                    <!--Info de la criatura del turno actual-->
+                </div>
+              <!--  <div id = "viewer_statBlock">
+                    <!--Info de la criatura consultada-->
+                <!--</div> -->
+            <div id="create_homebrew_form">
                 <form id="monster_form">
                     <h2>Create Custom Monster</h2>
                     <!-- Basic fields -->
                     <label>Name: <input type="text"  name="name" required></label><br>
                     <small style="color: red;"> Do not name the creature as a known monster in D&D (or add a tag to it like "h.")</small><br>
                     <label>Type: <input type="text" name="type"></label><br>
+                    <label>Languages: <input type="text" name="languages" placeholder = "common, druidic, infernal, etc"></label><br>
                     <label>Hit Points: <input type="number" name="hit_points" required></label><br>
                     <label>Armor Class: <input type="number" name="armor_class" required></label><br>
                     <label>Hit Dice: <input type="text" name="hit_dice"></label><br>
@@ -177,7 +172,9 @@
                     <h3>Actions</h3>
                     <div id="actions"></div>
                     <button type="button" id= "button_actions"> + Add Action</button>
-
+                    
+                    <label>Legendary Slots: <input type="text" name="legendarySlots" placeholder = "Description of legendary slots"></label><br>
+                    
                     <h3>Legendary Actions</h3>
                     <div id="legendary_actions"></div>
                     <button type="button" id="button_legendary_actions">+ Add Legendary Action</button>
@@ -197,6 +194,7 @@
                     <button type="button" id="submit">Save Monster</button>
                     <button type="button" id="cancel">Cancel</button>
                 </form>
+                </div>
             </div>
         <script type="module" src="main.js" defer></script>        
         </div>

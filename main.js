@@ -3,6 +3,16 @@ import * as Unit from './unit.js'
 
 var i = 0 //index (represents the current turn in the lists)
 
+function highlightCurrentCreature(index){
+    const table = document.getElementById("table_stats")
+    const currentRow = table.querySelector(`tr[data-index="${index}"]`)
+    if(index > 0){
+        const formerRow = table.querySelector(`tr[data-index="${index -1}"]`)
+        formerRow.classList.remove("highlight")
+    }
+        currentRow.classList.add("highlight")
+}
+
 function renderTable(){
     //Document conecta el HTML especificamente de la tabla con la variable para poder modificarla
     const tbody = document.getElementById("table_stats")
@@ -29,19 +39,39 @@ function renderTable(){
         const cellAc = document.createElement("td")
         cellAc.textContent = e.ac
         cellAc.dataset.field = "ac"
+        
 
         const cellStateEffects = document.createElement("td")
-        cellStateEffects.textContent = e.stateAndEffects
+
+        cellStateEffects.innerHTML = e.stateAndEffects.map((effect, i) => 
+            `${effect.condition} ${effect.duration ? effect.duration + "⏳" : ""}
+            <button type="button"
+            class="removeEffect"
+            data-unit="${index}" 
+            data-effect="${i}"> 
+                🗑️ </button>`
+        ).join("<br>") 
         cellStateEffects.dataset.field = "stateAndEffects"
+    
+        const cellActions = document.createElement("td")
+        cellActions.dataset.field = "actions"
+        cellActions.innerHTML = 
+        `<button type="button"
+            class = "seeStats"
+            title = "See Stat block"
+            data-unit="${index}">  
+               👁 </button>`
 
         row.appendChild(cellInitiative)
         row.appendChild(cellName)
         row.appendChild(cellHp)
         row.appendChild(cellAc)
         row.appendChild(cellStateEffects)
+        row.appendChild(cellActions)
         tbody.appendChild(row)
     })
-    console.log("Tabla renderizada")
+        highlightCurrentCreature(i)
+        console.log("Tabla renderizada")
 }
 
 function addNewUnit(){
@@ -49,7 +79,7 @@ function addNewUnit(){
     input.type = "text"
     input.id = "monster_name"
     input.placeholder = "Insert monster's name"
-    document.body.appendChild(input)
+    document.getElementById("table_stats").appendChild(input)
     input.focus()
     input.addEventListener("keydown", async (event) => {
         if(event.key == "Enter"){
@@ -57,8 +87,33 @@ function addNewUnit(){
             await Unit.newUnit(monster)
             input.remove()
             renderTable()
-        }})
+        }
+        if(event.key == "Escape"){
+                input.remove()
+                return
+            }
+        })
 }
+function checkConditions(index,beginOfTurn){
+    if(!Unit.unitList[index]){return}
+    let unitsToCheck = []
+    const moment = beginOfTurn ? "start" : "end"       
+    const creatureName = Unit.unitList[index].name
+    if (!creatureName) return
+        Unit.unitList.forEach(u => {
+            u.stateAndEffects
+            .filter(c => c.creature === creatureName && c.endsAt === moment)
+            .forEach(c => { c.duration = Math.max(0, (c.duration ?? 0) - 1) })})
+    updateConditions()
+}
+
+function updateConditions(){
+    Unit.unitList.forEach(u => {
+        u.stateAndEffects = u.stateAndEffects.filter(c => c.duration !== 0)
+    })
+  //renderTable(); Not necessary as it is done in next()
+}
+
 function updateRound(){
    const numRound = document.getElementById("current_round") 
    const newNum = Number(document.getElementById("current_round").textContent) +1
@@ -71,13 +126,42 @@ function resetRound(){
     numRound.textContent = 1
 
 }
-//funcion para Mostrar la info de cada uno.
-function renderCreatureInfo(index){
-    console.log("Index is:", index)
+function renderCreatureInfo(index, whereId){
+    if(!Unit.combatList[index]){return}
+    
     const creature = Unit.combatList[index]
     console.log("creature to render is: ", Unit.combatList[index]) 
-    const block = document.getElementById("creature_stats")
+    
+    let block = document.getElementById(whereId)
+    if(!block){
+        block = document.createElement("div")
+        block.id = "viewer_statBlock"
+        document.getElementById("creature_stats").appendChild(block)
+    }
+
     block.innerHTML = ""
+    if(block.style.display == "none"){block.style.display = "block"}
+    const panel = document.createElement("h3")
+    if(whereId == "current_statBlock"){
+        panel.textContent = "Actual"
+    }
+    else{panel.textContent = "Selected"}
+    
+    if (whereId === "viewer_statBlock") {
+        const close = document.createElement("button")
+        close.textContent = "✖"
+        close.title = "Close panel"
+        close.className = "closeBtn"
+        close.addEventListener("click", () => {
+            block.innerHTML = ""
+            panel.innerHTML = ""
+            block.style.display = "none"
+        })
+
+        panel.appendChild(close)
+    }
+
+    block.appendChild(panel)
     //Chequeo si es player
     if(creature.name.includes("P.")){
         console.log("Player's turn", creature.name)
@@ -91,6 +175,9 @@ function renderCreatureInfo(index){
 
         const type = document.createElement("p")
         type.textContent = "Type: " + creature.type
+
+        const lang = document.createElement("p")
+        lang.textContent = "Languages: " + (creature.languages  ? creature.languages : "none")
 
         const hp = document.createElement("p")
         hp.textContent = "HP: " + creature.hit_points
@@ -108,6 +195,9 @@ function renderCreatureInfo(index){
         const s = creature.speed
         speed.textContent = `Speed: Walk ${s.walk}, Swim ${s.swim}, Burrow ${s.burrow}, Fly ${s.fly}`
     
+        const legendarySlots = document.createElement("p")
+        legendarySlots.textContent = creature.legendarySlots ? creature.legendarySlots + " Those with (L)" : ""
+
         const actions = document.createElement("p")
         actions.innerHTML =  "Actions: <br>"
         creature.actions.forEach(action => {
@@ -137,14 +227,16 @@ function renderCreatureInfo(index){
         
         const saves = document.createElement("p")
         saves.textContent = `Saves: Str (${creature.saves.strength_save >= 0 ? '+' + creature.saves.strength_save : creature.saves.strength_save}), Dex (${creature.saves.dexterity_save >= 0 ? '+' + creature.saves.dexterity_save : creature.saves.dexterity_save}), Con(${creature.saves.constitution_save >= 0 ? '+' + creature.saves.constitution_save : creature.saves.constitution_save}), Int(${creature.saves.intelligence_save >= 0 ? '+' + creature.saves.intelligence_save : creature.saves.intelligence_save}), Wis(${creature.saves.wisdom_save >= 0 ? '+' + creature.saves.wisdom_save : creature.saves.wisdom_save}), Cha(${creature.saves.charisma_save >= 0 ? '+' + creature.saves.charisma_save : creature.saves.charisma_save})`
-
+        
         block.appendChild(name)
         block.appendChild(type)
+        block.appendChild(lang)
         block.appendChild(hp)
         block.appendChild(ac)
         block.appendChild(hitDice)
         block.appendChild(initiative)
         block.appendChild(speed)
+        block.appendChild(legendarySlots)
         block.appendChild(actions)
         block.appendChild(vulnerabilities)
         block.appendChild(resistances)
@@ -161,19 +253,18 @@ function startCombat(){
     console.log("starting combat")
     var index = 0
     resetRound()
-    console.log("when starting combat, unitlist: ", Unit.unitList)
-    console.log("when starting combat, combatlist: ", Unit.combatList)
-    renderCreatureInfo(index)
+    renderCreatureInfo(index,"current_statBlock")
     return index
 }
 
 function next(index){
-    console.log( index +1, ">", Unit.combatList.length -1)
+    checkConditions(index,false) //BeginOfTurn = false 
     if(index + 1 > Unit.combatList.length -1){
         index = 0
         updateRound()
     }
     else{index += 1}
+    checkConditions(index,true)
     console.log("next")
     console.log("index now", index)
     return index
@@ -185,92 +276,123 @@ document.getElementById("start_combat").addEventListener("click", () => {
     console.log("combatlist", Unit.combatList)
     console.log("unitList", Unit.unitList)
     i = startCombat()
-    renderCreatureInfo(i)})
+    renderCreatureInfo(i,"current_statBlock")})
 // Next button
 document.getElementById("next").addEventListener("click", () =>{ 
     i = next(i)
-    renderCreatureInfo(i)
+    renderTable()
+    renderCreatureInfo(i,"current_statBlock")
     })
 //New Unit button
 document.getElementById("new_unit").addEventListener("click", addNewUnit)
 //Sort Button
 document.getElementById("sort").addEventListener("click", () =>{
+    if(!Unit.unitList){return}
     Unit.sortUnitList()
     Unit.sortCombatList()
     renderTable()
-    renderCreatureInfo(i)})
-//New player button  //Corregir (creo que solucionado, o se bugea en un caso muy especifico)
+    renderCreatureInfo(i,"current_statBlock")})
+
+//New player button 
 document.getElementById("new_player").addEventListener("click", () => {
-    var playerName = ""
-    var playerHp = 0
-    var playerAc = 0
-    var playerInitiative = 0
-    // Pedir nombre, HP, AC e iniciativa
+    const form = document.createElement("form")
+    form.id = "playerForm"
+
     const inputName = document.createElement("input")
     inputName.type = "text"
     inputName.placeholder = "Enter player's name"
-    document.body.appendChild(inputName)
-    inputName.focus()
-    inputName.addEventListener("keydown", async (event) => {
-        if(event.key == "Enter"){
-            playerName = "P."+ inputName.value
-            inputName.remove()
-            const unit = new Unit.Unit(playerName, playerHp, playerAc, playerInitiative)
-            //como es el ultimo input que rellena, ponemos la creacion de la clase aca.
-            Unit.unitList.push(unit)
-            Unit.combatList.push(unit)
-            renderTable()
+    inputName.name = "name"
+    inputName.required = true
+    form.appendChild(inputName)
 
-        }})
     const inputHp = document.createElement("input")
-    inputHp.type = "text"
-    inputHp.placeholder = "Enter player's hp"
-    document.body.appendChild(inputHp)
-    inputHp.focus()
-    inputHp.addEventListener("keydown", async (event) => {
-        if(event.key == "Enter"){ 
-            if(inputHp.value >= 0){
-                playerHp = inputHp.value
-                inputHp.remove()
-        }
-            else{ alert("Hp must be a number, below 0 is not valid, try again.")}
-        }})
+    inputHp.type = "number"
+    inputHp.placeholder = "Enter player's HP"
+    inputHp.name = "hp"
+    inputHp.min = 0
+    inputHp.required = true
+    form.appendChild(inputHp)
 
- const inputAc = document.createElement("input")
-    inputAc.type = "text"
+    const inputAc = document.createElement("input")
+    inputAc.type = "number"
     inputAc.placeholder = "Enter player's armor class"
-    document.body.appendChild(inputAc)
-    inputAc.focus()
-    inputAc.addEventListener("keydown", async (event) => {
-        if(event.key == "Enter"){
-            if(inputAc.value >= 0){
-                playerAc = inputAc.value
-                inputAc.remove()
-        }
-            else{ alert("AC must be a number, below 0 is not valid, try again")}
-    }})
+    inputAc.name = "ac"
+    inputAc.min = 0
+    inputAc.required = true
+    form.appendChild(inputAc)
 
- const inputInitiative = document.createElement("input")
-    inputInitiative.type = "text"
+    const inputInitiative = document.createElement("input")
+    inputInitiative.type = "number"
     inputInitiative.placeholder = "Enter player's initiative roll"
-    document.body.appendChild(inputInitiative)
-    inputInitiative.focus()
-    inputInitiative.addEventListener("keydown", async (event) => {
-        if(event.key == "Enter"){ 
-            if(!isNaN(inputInitiative.value)){
-                playerInitiative = inputInitiative.value
-                inputInitiative.remove()
+    inputInitiative.name = "initiative"
+    inputInitiative.required = true
+    form.appendChild(inputInitiative)
+    
+    const submitBtn = document.createElement("button")
+    submitBtn.type = "submit"
+    submitBtn.textContent = "Add Player"
+    form.appendChild(submitBtn)
+
+
+    document.getElementById("table").appendChild(form)
+    inputName.focus()
+    // Listener del form
+    form.addEventListener("submit", (event) => {
+        event.preventDefault() 
+        if (!form.checkValidity()) {
+        form.reportValidity()
+        return
         }
-            else{alert("The initiative must be a number")}
-    }})
+    const data = new FormData(form)
+    const playerName = "P." + data.get("name")
+    const playerHp = Number(data.get("hp"))
+    const playerAc = Number(data.get("ac"))
+    const playerInitiative = Number(data.get("initiative"))
+
+    const unit = new Unit.Unit(playerName, playerHp, playerAc, playerInitiative)
+    Unit.unitList.push(unit)
+    Unit.combatList.push(unit)
+
+    form.reset()
+    form.remove()
+    renderTable()
+    })
+    const cancelBtn = document.createElement("button")
+    cancelBtn.type = "button"
+    cancelBtn.textContent = "Cancel"
+    cancelBtn.addEventListener("click", () => {
+        form.reset()
+        form.remove()     
+        })
+    form.appendChild(cancelBtn)
 })
 
 //Eliminate current creature Button
 document.getElementById("eliminate").addEventListener("click", () => {
+    if(!Unit.unitList[i]){return}
     Unit.unitList.splice(i,1) 
     Unit.combatList.splice(i,1)
     renderTable()
-    renderCreatureInfo(i)
+    renderCreatureInfo(i,"current_statBlock")
+})
+//RemoveEffect buttons
+document.getElementById("table_stats").addEventListener("click", (event) =>{
+    if(event.target.matches(".removeEffect")){
+        const btn = event.target
+        const unitId = Number(btn.dataset.unit);
+        const effectId = Number(btn.dataset.effect);
+        Unit.unitList[unitId].stateAndEffects.splice(effectId, 1);
+        renderTable()
+    }
+})
+//See Stat block buttons
+document.getElementById("table_stats").addEventListener("click", (event) => {
+     if(event.target.matches(".seeStats")){
+    const btn = event.target
+    const unit = Number(btn.dataset.unit);
+    renderCreatureInfo(unit,"viewer_statBlock")
+    
+}
 })
 
 //Editar tabla
@@ -281,7 +403,9 @@ document.querySelector("#table_stats").addEventListener("click", (event) => {
     const index = cell.parentElement.dataset.index  
     const field = cell.dataset.field                
     const originalValue = Unit.unitList[index][field]
-
+    
+    if(field == "actions"){return}
+   
     // Limpiar celda y crear input
     cell.textContent = ""
     const input = document.createElement("input")
@@ -328,6 +452,121 @@ document.querySelector("#table_stats").addEventListener("click", (event) => {
             }
         })
     }
+    else if(field == "stateAndEffects"){
+        input.remove() //Como uso el form este no me sirve    
+        const form = document.createElement("form")
+    
+        const conditionInput = document.createElement("input")
+        conditionInput.type = "text"
+        conditionInput.placeholder = "effect"
+        conditionInput.required = true
+        conditionInput.name = "effect"
+
+        const label = document.createElement("label")
+        const advancedInput = document.createElement("input")
+        advancedInput.type = "checkbox"
+        const text = document.createTextNode("Advanced options")
+
+        label.appendChild(advancedInput)
+        label.appendChild(text)
+        
+        form.appendChild(conditionInput)
+        form.appendChild(label) 
+
+        const advancedDiv = document.createElement("div")
+        advancedDiv.style.display = "none"
+
+        const labelStart = document.createElement("label")
+        const text1 = document.createTextNode("Until the start of ... 's turn")
+        const endsAtStart = document.createElement("input")
+        endsAtStart.type = "radio"
+        endsAtStart.name = "endsAt"
+        endsAtStart.value = "start"
+        endsAtStart.required = false
+        labelStart.appendChild(text1)
+        labelStart.appendChild(endsAtStart)
+        advancedDiv.appendChild(labelStart)
+
+        const labelEnd = document.createElement("label")
+        const text2 = document.createTextNode("Until the end of... 's turn")
+        const endsAtEnd = document.createElement("input")
+        endsAtEnd.type = "radio"
+        endsAtEnd.name = "endsAt"
+        endsAtEnd.value = "end"
+        labelEnd.appendChild(text2)
+        labelEnd.appendChild(endsAtEnd)
+        advancedDiv.appendChild(labelEnd)
+
+        const creature = document.createElement("input")
+        creature.type = "search"
+        creature.placeholder = "creature's name"
+        creature.required = false
+        creature.autocomplete = "on"
+        creature.name = "creature"
+        let datalist = document.getElementById("creatures-datalist")
+        if (!datalist) {
+            datalist = document.createElement("datalist")
+            datalist.id = "creatures-datalist"
+            }
+            datalist.innerHTML = ""  
+            Unit.unitList.forEach(e => {
+                const opt = document.createElement("option")
+                opt.value = e.name
+                datalist.appendChild(opt)
+                })
+        creature.setAttribute("list", datalist.id);
+        advancedDiv.appendChild(creature)
+        document.body.appendChild(datalist)
+
+        const duration = document.createElement("input")
+        duration.type = "number"
+        duration.name = "rounds"
+        duration.placeholder = "rounds"
+        duration.required = false
+        duration.min = 1
+        duration.step = 1
+        advancedDiv.appendChild(duration)
+
+        form.appendChild(advancedDiv)
+        
+        advancedInput.addEventListener("change", () =>{
+            advancedDiv.style.display = advancedInput.checked ? "block" : "none"
+            creature.required = !creature.required
+            duration.required = !duration.required
+            endsAtStart.required = !endsAtStart.required
+        })
+
+        const submit = document.createElement("button")
+        submit.type = "submit"
+        submit.textContent = "create"
+        form.addEventListener("submit", (e) => {
+        if (!form.checkValidity()) {
+            e.preventDefault()
+            form.reportValidity()
+            if(creature.value.toLowerCase() != Unit.unitList.some(e => e.toLowerCase)){
+                    alert("Creature not in the encounter")
+            }            
+            return
+        }
+        e.preventDefault()
+        const data = new FormData(form)
+        Unit.unitList[index].modifyStateAndEffects(data)
+        form.reset()
+        renderTable()
+        })
+
+        form.appendChild(submit)
+
+        const cancel = document.createElement("button")
+        cancel.type = "reset"
+        cancel.textContent = "cancel"
+        cancel.addEventListener("click", () =>{
+            form.reset()
+            renderTable()
+        })
+        form.appendChild(cancel)
+        cell.appendChild(form)
+    }
     else {
         function applyEdit(value) {
             if (!isNaN(value)) {
@@ -350,34 +589,35 @@ document.querySelector("#table_stats").addEventListener("click", (event) => {
                 } 
                 else {alert("Invalid number, cannot be below 0")}   
             } 
-            else if(field == "name"){
+            else {  //Name
                 Unit.unitList[index].modifyName(value)
             }
-            else {
-                Unit.unitList[index].modifyStateAndEffects(value)
             }
-            renderTable()
-        }
-
         input.addEventListener("keydown", (e) => {
             if (e.key === "Enter") {
                 applyEdit(input.value)
+                renderTable()
+            }
+            if(e.key === "Escape"){
+                renderTable() //cancels
             }
         })
 
         input.addEventListener("blur", () => {
             applyEdit(input.value)
+            renderTable()
         })
     }
-
 })
+
+
 
 function addAction() {
   const container = document.getElementById("actions")
   const div = document.createElement("div")
   div.innerHTML = `
-    <input type="text" name="action_name" placeholder="Nombre de la acción">
-    <input type="text" name="action_desc" placeholder="Descripción">
+    <input type="text" name="action_name" placeholder=" action's name">
+    <input type="text" name="action_desc" placeholder="description">
     `
   container.appendChild(div)
 }
@@ -386,8 +626,8 @@ function addLegendaryAction() {
   const container = document.getElementById("legendary_actions")
   const div = document.createElement("div")
   div.innerHTML = `
-    <input type="text" name="legendary_name" placeholder="Nombre de legendary">
-    <input type="text" name="legendary_desc" placeholder="Descripción">
+    <input type="text" name="legendary_name" placeholder="legendary action's name">
+    <input type="text" name="legendary_desc" placeholder="description">
   `
   container.appendChild(div)
 }
@@ -396,8 +636,8 @@ function addSpecialAbility() {
   const container = document.getElementById("special_abilities")
   const div = document.createElement("div")
   div.innerHTML = `
-    <input type="text" name="ability_name" placeholder="Nombre habilidad especial">
-    <input type="text" name="ability_desc" placeholder="Descripción">
+    <input type="text" name="ability_name" placeholder="special ability's name">
+    <input type="text" name="ability_desc" placeholder="description">
   `
   container.appendChild(div)
 }
@@ -407,7 +647,7 @@ function addSpell() {
   const input = document.createElement("input")
   input.type = "text"
   input.name = "spell_name"
-  input.placeholder = "Nombre del hechizo"
+  input.placeholder = "spell's name"
   container.appendChild(input)
 }
 function addSense() {
@@ -431,6 +671,10 @@ document.getElementById("eliminate_homebrew").addEventListener( "click", () =>{
                 const monsterName = input.value
                 input.remove()
                 Creature.removeHomebrew(monsterName)
+            }
+            if(e.key === "Escape"){
+                input.remove()
+                return
             }
         })
     })

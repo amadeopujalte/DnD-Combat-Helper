@@ -21,10 +21,12 @@ class Creature {
     slug,    
     name,
     type,
+    languages, //expected {common, spanish, etc.}
     hit_points,
     armor_class,
-    speed,         // Esperado: { walk, swim, burrow, fly }
-    actions = [],
+    speed,         // expected: { walk, swim, burrow, fly }
+    actions = [], //actions, spells, special abilities and legendary actions
+    legendarySlots, //String expected 
     stats,// { str, dex, con, int, wis, cha }
     saves,
     resistances = [],
@@ -34,11 +36,12 @@ class Creature {
     features,
     hit_dice
   }) {
-    this.slug = slug;
-    this.name = name;
-    this.type = type;
-    this.hit_points = hit_points;
-    this.armor_class = armor_class;
+    this.slug = slug
+    this.name = name
+    this.type = type
+    this.languages = languages
+    this.hit_points = hit_points
+    this.armor_class = armor_class
 
     // Velocidades individuales (null si no tiene)
     this.speed = {
@@ -49,6 +52,7 @@ class Creature {
     }
 
     this.actions = actions
+    this.legendarySlots = legendarySlots
     this.stats = stats
     this.saves = saves
     this.resistances = resistances
@@ -134,16 +138,13 @@ async function getMonster(monsterSlug){
         return 0}
 }
 
-
-//Save creature List
-//Save hombrew List
-
 function createHomebrew(info){
 
 let monster = {
     slug: transformIntoSlug(info.get("name")),
     name: info.get("name"),
     type: info.get("type"),
+    languages: info.get("languages"),
     hit_points: Number(info.get("hit_points")),
     armor_class: Number(info.get("armor_class")),
     hit_dice: info.get("hit_dice"),
@@ -172,12 +173,12 @@ let monster = {
     damage_vulnerabilities: info.getAll("damage_vulnerabilities"),
     condition_immunities: info.getAll("condition_immunities"),
     senses: info.getAll("senses"),
-
+    
     actions: info.getAll("action_name").map((name, i) => ({
         name: name,
         desc: info.getAll("action_desc")[i]
     })),
-
+    legendarySlots: info.get("legendarySlots"),
     legendary_actions: info.getAll("legendary_action_name").map((name, i) => ({
         name: name,
         desc: info.getAll("legendary_action_desc")[i]
@@ -211,6 +212,7 @@ function convertToCreature(monsterData) {
     slug,
     name,
     type,
+    languages,
     hit_points,
     armor_class,
     hit_dice,
@@ -218,6 +220,7 @@ function convertToCreature(monsterData) {
     actions = [],
     spell_list = [],
     legendary_actions = [],
+    legendary_desc,
     damage_resistances,
     damage_immunities,
     damage_vulnerabilities, 
@@ -227,7 +230,6 @@ function convertToCreature(monsterData) {
     special_abilities = [],
     senses = ""
   } = monsterData;
-
     // 1. Unificar acciones, hechizos y acciones legendarias
   const allActions = [
     ...actions,
@@ -239,7 +241,7 @@ function convertToCreature(monsterData) {
       };
     }),
     ...(legendary_actions || []).map(la => ({
-      name: la.name,
+      name: "(L) " + la.name,
       desc: la.desc
     }))
   ];
@@ -303,22 +305,24 @@ function convertToCreature(monsterData) {
   ];
 
   // 5. Resistencias, inmunidades y vulnerabilidades como arrays
-  const resistances = parseDelimitedList(damage_resistances);
+  const resistances = parseDelimitedList(damage_resistances)
   const immunities = [
     ...parseDelimitedList(damage_immunities),
     ...parseDelimitedList(condition_immunities)
   ];
-  const vulnerabilities = parseDelimitedList(damage_vulnerabilities); 
+  const vulnerabilities = parseDelimitedList(damage_vulnerabilities) 
 
   // 6. Crear instancia
   return new Creature({
     slug,
     name,
     type,
+    languages: languages || "",
     hit_points: Number(hit_points),
     armor_class: Number(armor_class),
     speed,
     actions: allActions,
+    legendarySlots: legendary_desc,
     stats,
     saves,
     resistances,

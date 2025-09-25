@@ -1,0 +1,102 @@
+:root{
+  --header-h: 120px;   /* altura real del header */
+}
+html, body { height: 100%; margin: 0; }
+body { 
+    display: flex; 
+    flex-direction: column; 
+    overflow: auto;
+    background-image: url("assets/papiro.png");
+    min-height: 120vh;
+}
+
+header {
+  height: var(--header-h);
+  /*position: sticky;     queda visible al hacer scroll */
+  top: 0;
+  z-index: 1000;
+  height: 120px; 
+  background-image: url("assets/logo.png");
+  background-repeat: no-repeat;
+  background-position: left;   
+  background-size: contain;      
+}
+/*footer{
+    background-color: #7a5c2f;   
+    color: #fefaf3;              
+    padding: 40px 20px;          
+    text-align: center;          
+    font-size: 16px;             
+    line-height: 1.6;            
+}*/
+#container {
+    background-image:url("assets/papiro.png") ;
+    display: grid;
+    grid-template-columns: 1fr 620px;
+    gap: 6px;
+    height: 100%;
+    overflow: hidden;
+}
+
+#table {
+    grid-column: 1 / 2; 
+    width: 100%;
+    border-collapse: collapse;
+    background-image: url("assets/dragonfondo.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-position: center;
+    overflow-y: auto; 
+}
+
+th, td {
+    border: 1px solid #ffff ;
+    color: #ffff;
+    padding: 10px;
+}
+
+.highlight {
+  outline: 3px solid goldenrod;  
+  outline-offset: -3px;     
+}
+#round_counter{
+    color: #ffff;
+}
+#creature_stats {
+    grid-column: 2 / 3;
+    border-left: 1px solid #ccc;
+    padding-left: 10px;
+    display: flex;
+    gap: 10px;         
+    align-items: flex-start;
+}
+#current_statBlock, #viewer_statBlock {
+  flex: 1 1 50%;
+  max-height: 500px;   
+  overflow-y: auto;   
+  border: 1px solid #ddd;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+#creature_stats > #current_statBlock:only-child {
+  flex: 1 1 100%;
+}
+
+#viewer_statBlock .closeBtn {
+  display: inline-block;
+  margin-left: 60%;
+  
+}
+
+#create_homebrew_form {
+    max-height: 500px;
+    overflow-y: auto;
+    min-height: 0;      
+    display: none;
+}
+button {
+    background: none;
+    color: #ffff;
+    border: 1px solid #ffff;
+}

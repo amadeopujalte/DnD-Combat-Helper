@@ -4,6 +4,7 @@ import * as Unit from './unit.js'
 var i = 0 //index (represents the current turn in the lists)
 
 function highlightCurrentCreature(index){
+    if(Unit.combatList.length == 0){return}
     const table = document.getElementById("table_stats")
     const currentRow = table.querySelector(`tr[data-index="${index}"]`)
     if(index > 0){
@@ -14,9 +15,7 @@ function highlightCurrentCreature(index){
 }
 
 function renderTable(){
-    //Document conecta el HTML especificamente de la tabla con la variable para poder modificarla
     const tbody = document.getElementById("table_stats")
-    //Limpia lo que sea que haya dentro
     tbody.innerHTML= ""
     var index = 0
     Unit.unitList.forEach( (e) => {
@@ -751,3 +750,74 @@ window.addEventListener("DOMContentLoaded", () => {
         Creature.creatureList.push(...convertedCl)
     }
 })
+
+function makeDialog(results){
+  return new Promise((resolve,reject) => {
+    const dialog = document.createElement("dialog")
+    dialog.className = "dialog"
+    dialog.innerHTML = `
+      <form method="dialog">
+        <h3>Choose creature</h3>
+        <div style="display:flex">
+          <section>
+            <h4>Already Used (local list)</h4>
+            <ol id="local"></ol>
+          </section>
+          <section>
+            <h4>Others</h4>
+            <h5> Name , Hp, Ac, source </h5>
+            <ol id="api"></ol>
+          </section>
+        </div>
+        <button type="button" id="cancel" style="color: black">Cancel</button>
+      </form>
+    `;
+
+    const localList = dialog.querySelector("#local")
+    const apiList   = dialog.querySelector("#api")
+
+    results.local.forEach((e, i) => {
+      const li = document.createElement("li")
+      li.dataset.index = i
+      li.dataset.list  = "local"
+      li.textContent   = `[ ${e.name}, ${e.hit_points}, ${e.armor_class}, ${e.document__title} ]`
+      localList.appendChild(li)
+    })
+
+    results.api.forEach((e, j) => {
+      const li = document.createElement("li")
+      li.dataset.index = j
+      li.dataset.list  = "api" 
+      li.textContent   = `[ ${e.name}, ${e.hit_points}, ${e.armor_class}, ${e.document__title} ]`
+      apiList.appendChild(li)
+    })
+
+    document.body.appendChild(dialog)
+    dialog.showModal()
+
+    dialog.addEventListener("click", (event) => {
+      if (event.target.id === "cancel") {
+        dialog.close()
+        dialog.remove()
+        resolve(null)
+        return
+      }
+      const li = event.target.closest("li")
+      if (!li){return}
+      const list  = li.dataset.list
+      const index = parseInt(li.dataset.index, 10)
+      const monster  = results[list][index]
+      dialog.close()
+      dialog.remove()
+      resolve(monster)
+    })
+  })
+}
+ export async function chooseMonster(results){
+    const monster =  await makeDialog(results)
+    console.log("Make dialog result: ", monster)
+    return monster
+}
+
+
+

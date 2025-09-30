@@ -4,19 +4,18 @@ import * as Unit from './unit.js'
 var i = 0 //index (represents the current turn in the lists)
 
 function highlightCurrentCreature(index){
+    if(Unit.combatList.length == 0){return}
     const table = document.getElementById("table_stats")
     const currentRow = table.querySelector(`tr[data-index="${index}"]`)
+    if (!currentRow){return}
     if(index > 0){
         const formerRow = table.querySelector(`tr[data-index="${index -1}"]`)
         formerRow.classList.remove("highlight")
     }
         currentRow.classList.add("highlight")
 }
-
 function renderTable(){
-    //Document conecta el HTML especificamente de la tabla con la variable para poder modificarla
     const tbody = document.getElementById("table_stats")
-    //Limpia lo que sea que haya dentro
     tbody.innerHTML= ""
     var index = 0
     Unit.unitList.forEach( (e) => {
@@ -71,7 +70,7 @@ function renderTable(){
         tbody.appendChild(row)
     })
         highlightCurrentCreature(i)
-        console.log("Tabla renderizada")
+        console.log("Table rendered")
 }
 
 function addNewUnit(){
@@ -171,7 +170,7 @@ function renderCreatureInfo(index, whereId){
     }    
     else{
         const name = document.createElement("p")
-        name.textContent = "Name: " + creature.name
+        name.textContent = "Name: " + creature.name + (creature.name != Unit.unitList[index].name ? " (" + Unit.unitList[index].name + ")" : "")
 
         const type = document.createElement("p")
         type.textContent = "Type: " + creature.type
@@ -266,35 +265,62 @@ function next(index){
     else{index += 1}
     checkConditions(index,true)
     console.log("next")
-    console.log("index now", index)
+    //console.log("index now", index)
     return index
 }
+function isWriting(targetOfEvent){
+    const typing = targetOfEvent.tagName === "INPUT" || targetOfEvent.tagName === "TEXTAREA" || targetOfEvent.isContentEditable
+    return typing
+}
 //Buttons
-// Start Combat Button
-document.getElementById("start_combat").addEventListener("click", () => {
+function startCombatButtonBehaviour(){
     console.log("starting combat")
-    console.log("combatlist", Unit.combatList)
-    console.log("unitList", Unit.unitList)
+   // console.log("combatlist", Unit.combatList)
+   // console.log("unitList", Unit.unitList)
     i = startCombat()
-    renderCreatureInfo(i,"current_statBlock")})
+    renderCreatureInfo(i,"current_statBlock")
+}
+// Start Combat Button
+document.getElementById("start_combat").addEventListener("click", startCombatButtonBehaviour)
+//Shortcut
+document.addEventListener("keydown", (e) => {
+    const t = e.target
+    if(!isWriting(t) && e.key.toLowerCase() === "e"){startCombatButtonBehaviour()}
+})
 // Next button
-document.getElementById("next").addEventListener("click", () =>{ 
+function nextButtonBehavior(){
     i = next(i)
     renderTable()
     renderCreatureInfo(i,"current_statBlock")
-    })
+}
+document.getElementById("next").addEventListener("click", nextButtonBehavior)
+//Shortcut
+document.addEventListener("keydown", (e) =>{
+    const t = e.target
+    if(!isWriting(t) && e.key.toLowerCase() === "n"){nextButtonBehavior()}
+})
 //New Unit button
 document.getElementById("new_unit").addEventListener("click", addNewUnit)
+//Shortcut
+document.addEventListener("keyup", (e) => {
+    const t = e.target
+    if(!isWriting(t) && e.key.toLowerCase() === "u"){addNewUnit()}
+})
 //Sort Button
-document.getElementById("sort").addEventListener("click", () =>{
+function sortButtonBehavior(){
     if(!Unit.unitList){return}
     Unit.sortUnitList()
     Unit.sortCombatList()
     renderTable()
-    renderCreatureInfo(i,"current_statBlock")})
-
-//New player button 
-document.getElementById("new_player").addEventListener("click", () => {
+    renderCreatureInfo(i,"current_statBlock")
+}
+document.getElementById("sort").addEventListener("click", sortButtonBehavior)
+//Shortcut
+document.addEventListener("keydown", (e) => {
+    const t = e.target
+    if(!isWriting(t) && e.key.toLowerCase() === "s"){sortButtonBehavior()}
+})
+function newPlayer(){
     const form = document.createElement("form")
     form.id = "playerForm"
 
@@ -365,16 +391,33 @@ document.getElementById("new_player").addEventListener("click", () => {
         form.remove()     
         })
     form.appendChild(cancelBtn)
+
+}
+//New player button 
+document.getElementById("new_player").addEventListener("click", newPlayer)
+//Shortcut
+document.addEventListener("keyup", (e) => {
+    const t = e.target
+    if(!isWriting(t) && e.key.toLowerCase() == "p"){newPlayer()}
 })
 
-//Eliminate current creature Button
-document.getElementById("eliminate").addEventListener("click", () => {
+function eliminateCurrentCreature(){
     if(!Unit.unitList[i]){return}
     Unit.unitList.splice(i,1) 
     Unit.combatList.splice(i,1)
+    if (i >= Unit.unitList.length) {
+        i = Unit.unitList.length - 1;
+    }
     renderTable()
     renderCreatureInfo(i,"current_statBlock")
-})
+}
+//Eliminate current creature Button
+document.getElementById("eliminate").addEventListener("click", eliminateCurrentCreature)
+//Shortcut
+document.addEventListener("keydown", (e) => {
+    const t = e.target
+    if (!isWriting(t) && e.key === "Backspace") {eliminateCurrentCreature()}})
+
 //RemoveEffect buttons
 document.getElementById("table_stats").addEventListener("click", (event) =>{
     if(event.target.matches(".removeEffect")){
@@ -390,12 +433,11 @@ document.getElementById("table_stats").addEventListener("click", (event) => {
      if(event.target.matches(".seeStats")){
     const btn = event.target
     const unit = Number(btn.dataset.unit);
-    renderCreatureInfo(unit,"viewer_statBlock")
-    
+    renderCreatureInfo(unit,"viewer_statBlock")    
 }
 })
 
-//Editar tabla
+//Edit table
 document.querySelector("#table_stats").addEventListener("click", (event) => {
     const cell = event.target
     if (cell.tagName !== "TD") return
@@ -406,7 +448,6 @@ document.querySelector("#table_stats").addEventListener("click", (event) => {
     
     if(field == "actions"){return}
    
-    // Limpiar celda y crear input
     cell.textContent = ""
     const input = document.createElement("input")
     input.type = "text"
@@ -416,7 +457,6 @@ document.querySelector("#table_stats").addEventListener("click", (event) => {
     input.focus()
 
     if (field === "hp") {
-        // Crear botones
         const btnAdd = document.createElement("button")
         btnAdd.textContent = "+"
         const btnSubtract = document.createElement("button")
@@ -704,7 +744,7 @@ document.getElementById("create_homebrew").addEventListener("click" , () =>{
     })
 document.getElementById("submit").addEventListener( "click" , () =>{
         const requiredFields = document.querySelectorAll("#monster_form [required]")
-        console.log(requiredFields)
+        //console.log(requiredFields)
         const array = Array.from(requiredFields)
         if(array.some( e => e.value == "")){
             const missingFields = array.filter( e => e.value === "") 
@@ -751,3 +791,72 @@ window.addEventListener("DOMContentLoaded", () => {
         Creature.creatureList.push(...convertedCl)
     }
 })
+
+function makeDialog(results){
+  return new Promise((resolve,reject) => {
+    const dialog = document.createElement("dialog")
+    dialog.className = "dialog"
+    dialog.innerHTML = `
+      <form method="dialog">
+        <h3>Choose creature:</h3>
+        <p> [Name , Hp, Ac, source] </p>
+        <div style="display:flex">
+          <section>
+            <h4>Already Used (local list)</h4>
+            <ul id="local"></ol>
+          </section>
+          <section>
+            <h4>Others</h4>
+            <ul id="api"></ol>
+          </section>
+        </div>
+        <button type="button" id="cancel" style="color: black">Cancel</button>
+      </form>
+    `
+
+    const localList = dialog.querySelector("#local")
+    const apiList   = dialog.querySelector("#api")
+
+    results.local.forEach((e, i) => {
+      const li = document.createElement("li")
+      li.dataset.index = i
+      li.dataset.list  = "local"
+      li.textContent   = `[ ${e.name}, ${e.hit_points}, ${e.armor_class}, ${e.document__title} ]`
+      localList.appendChild(li)
+    })
+
+    results.api.forEach((e, j) => {
+      const li = document.createElement("li")
+      li.dataset.index = j
+      li.dataset.list  = "api" 
+      li.textContent   = `[ ${e.name}, ${e.hit_points}, ${e.armor_class}, ${e.document__title} ]`
+      apiList.appendChild(li)
+    })
+
+    document.body.appendChild(dialog)
+    dialog.showModal()
+
+    dialog.addEventListener("click", (event) => {
+      if (event.target.id === "cancel") {
+        dialog.close()
+        dialog.remove()
+        resolve(null)
+        return
+      }
+      const li = event.target.closest("li")
+      if (!li){return}
+      const list  = li.dataset.list
+      const index = parseInt(li.dataset.index, 10)
+      const monster  = results[list][index]
+      dialog.close()
+      dialog.remove()
+      resolve(monster)
+    })
+  })
+}
+ export async function chooseMonster(results){
+    const monster =  await makeDialog(results)
+    //console.log("Make dialog result: ", monster)
+    return monster
+}
+

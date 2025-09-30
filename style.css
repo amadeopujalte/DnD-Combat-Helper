@@ -12,7 +12,6 @@ body {
 
 header {
   height: var(--header-h);
-  /*position: sticky;     queda visible al hacer scroll */
   top: 0;
   z-index: 1000;
   height: 120px; 
@@ -21,14 +20,14 @@ header {
   background-position: left;   
   background-size: contain;      
 }
-/*footer{
+footer{
     background-color: #7a5c2f;   
     color: #fefaf3;              
     padding: 40px 20px;          
     text-align: center;          
     font-size: 16px;             
     line-height: 1.6;            
-}*/
+}
 #container {
     background-image:url("assets/papiro.png") ;
     display: grid;
@@ -47,6 +46,8 @@ header {
     background-size: 100% 100%;
     background-position: center;
     overflow-y: auto; 
+    text-shadow: 1px 1px 2px #000
+
 }
 
 th, td {
@@ -99,4 +100,39 @@ button {
     background: none;
     color: #ffff;
     border: 1px solid #ffff;
+}
+button:hover{
+    background: transparent;
+    border: 1px solid #f0f0f0;
+    color: #f0f0f0;
+    padding: 6px 12px;
+}
+
+.dialog{
+    background-image: url("assets/fondoDialog.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-position: center;
+    color: #f5e6b3;
+    text-shadow: 1px 1px 2px #000
+    }
+.dialog section:nth-of-type(2) {
+  margin-left: 40px; 
+}
+
+.dialog button {
+  background: transparent;
+  border: 1px solid #f0f0f0;
+  color: #f0f0f0;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+.dialog button:hover {
+  background: #8ca0b3; 
+  color: #1a1a1a;      
+}
+.dialog li:hover {
+  border: 1px solid #8ca0b3;  
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
 }

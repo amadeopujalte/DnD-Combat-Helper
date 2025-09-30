@@ -73,8 +73,15 @@ function sortCombatList(){
 
 async function addMonsterToCombatList(monsterName){
     console.log("Searching monster")
-    const monster = await Creature.searchMonster(monsterName)
-    if(monster !== 0){
+    const results = await Creature.searchMonster(monsterName)
+    const monsterSlug = await Creature.selectSlugFromResults(results) //This await simply unwrapps the value form the promise. it does not have to wait
+    if(monsterSlug == null){return 0}
+    //console.log("monsterSlug in AddMonsterTocomabtList: ",monsterSlug)
+    let monster = 0
+    if(monsterSlug){ 
+        monster = await Creature.getMonster(monsterSlug)
+    }
+    if(monster != 0){
         combatList.push(monster)
     }
     else{
@@ -88,7 +95,7 @@ let unitList = []
 
 function createUnits(){
         var index = combatList.length
-        const e = combatList[index -1] //Also could use combatList.at(-1) but i dont like it.
+        const e = combatList[index -1] 
       //  console.log("Element e is:",e)
         const unit = new Unit(e.name, e.hit_points, e.armor_class, (e.init + e.d20()), e.stats.dexterity)
         e.initiativeRoll = unit.initiative

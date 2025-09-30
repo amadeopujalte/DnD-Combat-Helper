@@ -1,3 +1,4 @@
+import { chooseMonster } from './main.js';
 class Action {
   constructor({ name, desc, attack_bonus = null, damage_dice = null }) {
     this.name = name;
@@ -13,8 +14,6 @@ class Trait {
     this.desc = desc;
   }
 }
-
-
 
 class Creature {
   constructor({
@@ -34,7 +33,8 @@ class Creature {
     vulnerabilities = [],
     traits,
     features,
-    hit_dice
+    hit_dice,
+    document__title
   }) {
     this.slug = slug
     this.name = name
@@ -62,6 +62,7 @@ class Creature {
     this.hit_dice = hit_dice
     this.init = Math.floor((stats.dexterity-10)/2) //Initiative
     this.initiativeRoll
+    this.document__title = document__title
   }
     d20(){
        var roll = this.getRandomIntInclusive(1,20)
@@ -103,23 +104,78 @@ function transformIntoSlug(monsterName){
     var slug =  monsterName.toLowerCase().replaceAll(' ', '-')
     return slug
 }
+function normalizeName(monsterName){
+    var normalized = (monsterName.toLowerCase().split(/\s+/)).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")
+    .trim()
+    return normalized
+}
+async function filterApiByName(monsterName){
+    try{
+    const response = await fetch(`https://api.open5e.com/v1/monsters/?search=${monsterName}&limit=80`)
+    var data = await response.json()
+    var monsterList = data.results.filter(creature => creature.name.includes(monsterName))
+    //console.log(data)
+    //console.log("monsterList: ", monsterList)
+    if(response.ok === true){
+        return monsterList
+    }
+
+    else{
+        console.log("Server Error", response)
+        return 0}
+    }
+    catch(error){
+        console.log("Error connecting to API.",error)
+        return 0}
+}
+function filterLocalByName(monsterName){
+    let lista1 = creatureList.filter(creature  => creature.name.startsWith(monsterName))
+    let lista2 = homebrewCreatureList.filter( e => e.name.startsWith(monsterName))
+    return [...lista1, ...lista2]
+}
+
 async function searchMonster(monsterName){
-    var monsterSlug = transformIntoSlug(monsterName)
-    var monster
-    monster =  creatureList.find(p => p.slug === monsterSlug) || homebrewCreatureList.find(p => p.slug === monsterSlug)
+    var name = normalizeName(monsterName)
+    let localResults = filterLocalByName(name)
+    let apiResults = await filterApiByName(name)
+    apiResults = apiResults.filter(creature => !localResults.some(local => local.slug === creature.slug)) //Desduplicate
+    let lists = {
+        local: localResults,
+        api: apiResults
+        }
+    return lists
+}
+
+async function selectSlugFromResults(results){
+    if(results.local.length == 0 && results.api.length == 0){
+        console.log("cero results")    
+        return 0
+    }
+    if(results.local.length == 1 && results.api.length == 0){
+        return results.local[0].slug
+    }
+     if(results.local.length == 0 && results.api.length == 1){
+        return results.api[0].slug
+    }
+    else{
+        const monster =  await chooseMonster(results)
+        if(!monster){return null}
+        return monster.slug
+    } 
+}
+async function getMonster(monsterSlug){
+    if(monsterSlug == 0){return monsterSlug}
+    var monster =  creatureList.find(p => p.slug === monsterSlug) || homebrewCreatureList.find(p => p.slug === monsterSlug)
     if(!monster){
-            monster = await getMonster(monsterSlug)
-            console.log("monster is:" , monster)
+            monster = await fetchMonster(monsterSlug)
             if(monster!== 0){
-            // Adapta los monstruos extraidos del fecth a los datos de la clase Creature para poder usar cosas como iniative.
                 monster = convertToCreature(monster)
                 creatureList.push(monster)
             }
     }
     return monster
         }
-
-async function getMonster(monsterSlug){
+async function fetchMonster(monsterSlug){
     console.log("getting monster by api")
     try{
     const response = await fetch(`https://api.open5e.com/v1/monsters/${monsterSlug}/`)
@@ -188,7 +244,8 @@ let monster = {
         name: name,
         desc: info.getAll("special_ability_desc")[i]
     })),
-    spell_list: info.getAll("spell_name")
+    spell_list: info.getAll("spell_name"),
+    document__title: "homebrew"
     }
     const homebrew = convertToCreature(monster)
     homebrewCreatureList.push(homebrew)
@@ -228,7 +285,8 @@ function convertToCreature(monsterData) {
     strength, dexterity, constitution, intelligence, wisdom, charisma,
     strength_save, dexterity_save, constitution_save, intelligence_save, wisdom_save, charisma_save,
     special_abilities = [],
-    senses = ""
+    senses = "",
+    document__title
   } = monsterData;
     // 1. Unificar acciones, hechizos y acciones legendarias
   const allActions = [
@@ -302,7 +360,7 @@ function convertToCreature(monsterData) {
       name: "Senses",
       desc: senses
     }] : [])
-  ];
+  ]
 
   // 5. Resistencias, inmunidades y vulnerabilidades como arrays
   const resistances = parseDelimitedList(damage_resistances)
@@ -329,7 +387,8 @@ function convertToCreature(monsterData) {
     immunities,
     vulnerabilities, 
     traits,
-    hit_dice
+    hit_dice,
+    document__title: document__title
   });
 }
 
@@ -342,4 +401,4 @@ function parseDelimitedList(input) {
     .filter(s => s.length > 0);
 } 
  
-export { Creature, creatureList, homebrewCreatureList, createHomebrew, removeHomebrew, transformIntoSlug , searchMonster, getMonster, convertToCreature, parseDelimitedList }
+export { Creature, creatureList, homebrewCreatureList, createHomebrew, removeHomebrew, transformIntoSlug , searchMonster, getMonster, selectSlugFromResults, convertToCreature, parseDelimitedList }

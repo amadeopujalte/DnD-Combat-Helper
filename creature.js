@@ -110,11 +110,11 @@ function normalizeName(monsterName){
 }
 async function filterApiByName(monsterName){
     try{
-    const response = await fetch(`https://api.open5e.com/v1/monsters/?search=${monsterName}&limit=50`)
+    const response = await fetch(`https://api.open5e.com/v1/monsters/?search=${monsterName}&limit=80`)
     var data = await response.json()
-    var monsterList = data.results
-    console.log(data)
-    console.log("monsterList: ", monsterList)
+    var monsterList = data.results.filter(creature => creature.name.includes(monsterName))
+    //console.log(data)
+    //console.log("monsterList: ", monsterList)
     if(response.ok === true){
         return monsterList
     }
@@ -137,7 +137,7 @@ async function searchMonster(monsterName){
     var name = normalizeName(monsterName)
     let localResults = filterLocalByName(name)
     let apiResults = await filterApiByName(name)
-    console.log("apiResults: ", apiResults)
+    //console.log("apiResults: ", apiResults)
     apiResults = apiResults.filter(creature => !localResults.some(local => local.slug === creature.slug)) //Desduplicate
     let lists = {
         local: localResults,
@@ -147,7 +147,6 @@ async function searchMonster(monsterName){
 }
 
 async function selectSlugFromResults(results){
-    console.log("SelectSlugFrom Results Entered")
     var monsterSlug = 0
     if(results.local.length == 0 && results.api.length == 0){return 0}
     if(results.local.length == 1 && results.api.length == 0){
@@ -157,7 +156,6 @@ async function selectSlugFromResults(results){
         monsterSlug = results.api[0].slug
     }
     else{
-        console.log("chooseMonster branch")
         const monster =  await chooseMonster(results)
         if(!monster){return null}
         monsterSlug = monster.slug
@@ -169,7 +167,6 @@ async function getMonster(monsterSlug){
     var monster =  creatureList.find(p => p.slug === monsterSlug) || homebrewCreatureList.find(p => p.slug === monsterSlug)
     if(!monster){
             monster = await fetchMonster(monsterSlug)
-            console.log("monster is:" , monster)
             if(monster!== 0){
                 monster = convertToCreature(monster)
                 creatureList.push(monster)

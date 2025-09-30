@@ -170,7 +170,7 @@ function renderCreatureInfo(index, whereId){
     }    
     else{
         const name = document.createElement("p")
-        name.textContent = "Name: " + creature.name
+        name.textContent = "Name: " + creature.name + (creature.name != Unit.unitList[index].name ? " (" + Unit.unitList[index].name + ")" : "")
 
         const type = document.createElement("p")
         type.textContent = "Type: " + creature.type
@@ -394,7 +394,7 @@ document.getElementById("table_stats").addEventListener("click", (event) => {
 }
 })
 
-//Editar tabla
+//Edit table
 document.querySelector("#table_stats").addEventListener("click", (event) => {
     const cell = event.target
     if (cell.tagName !== "TD") return
@@ -405,7 +405,6 @@ document.querySelector("#table_stats").addEventListener("click", (event) => {
     
     if(field == "actions"){return}
    
-    // Limpiar celda y crear input
     cell.textContent = ""
     const input = document.createElement("input")
     input.type = "text"
@@ -415,7 +414,6 @@ document.querySelector("#table_stats").addEventListener("click", (event) => {
     input.focus()
 
     if (field === "hp") {
-        // Crear botones
         const btnAdd = document.createElement("button")
         btnAdd.textContent = "+"
         const btnSubtract = document.createElement("button")
@@ -757,21 +755,21 @@ function makeDialog(results){
     dialog.className = "dialog"
     dialog.innerHTML = `
       <form method="dialog">
-        <h3>Choose creature</h3>
+        <h3>Choose creature:</h3>
+        <p> [Name , Hp, Ac, source] </p>
         <div style="display:flex">
           <section>
             <h4>Already Used (local list)</h4>
-            <ol id="local"></ol>
+            <ul id="local"></ol>
           </section>
           <section>
             <h4>Others</h4>
-            <h5> Name , Hp, Ac, source </h5>
-            <ol id="api"></ol>
+            <ul id="api"></ol>
           </section>
         </div>
         <button type="button" id="cancel" style="color: black">Cancel</button>
       </form>
-    `;
+    `
 
     const localList = dialog.querySelector("#local")
     const apiList   = dialog.querySelector("#api")
@@ -815,9 +813,13 @@ function makeDialog(results){
 }
  export async function chooseMonster(results){
     const monster =  await makeDialog(results)
-    console.log("Make dialog result: ", monster)
+    //console.log("Make dialog result: ", monster)
     return monster
 }
 
-
+//Shortcuts for buttons
+//footer with email and posibile donation and how to use.
+//Virtual Dices
+//Investigar como hacer para que aparezca en top results al buscar en google
+//Publish!!!!
 

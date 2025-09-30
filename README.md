@@ -28,16 +28,13 @@ The tool is currently in an active **development phase**, and already supports:
 - ✅ Creating and saving homebrew monsters
 - ✅ Display and track round-based and non-round based effects for each creature in the encounter
 - ✅ View any creature’s stat block, even off-turn.” 
-
+- ✅ Unify monster search across Open5e sources (name query).
 ---
 
 ## 🧩 Coming Soon
 Planned features include:
-- 🔍 Unify monster search across Open5e sources (name query).
 - 🎲 Virtual dices (that can be used for regular rolls or to automatically add attack bonuses and do the damage for you!)
 - 🎨 Visual and UX improvements to make the tool more user-friendly
-
-
 ---
 
 ## 💡 Notes

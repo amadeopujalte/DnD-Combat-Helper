@@ -105,7 +105,8 @@ function transformIntoSlug(monsterName){
     return slug
 }
 function normalizeName(monsterName){
-    var normalized = (monsterName.charAt(0).toUpperCase() + monsterName.slice(1)).replace(/\s+/g, ' ').trim()
+    var normalized = (monsterName.toLowerCase().split(/\s+/)).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")
+    .trim()
     return normalized
 }
 async function filterApiByName(monsterName){
@@ -137,7 +138,6 @@ async function searchMonster(monsterName){
     var name = normalizeName(monsterName)
     let localResults = filterLocalByName(name)
     let apiResults = await filterApiByName(name)
-    //console.log("apiResults: ", apiResults)
     apiResults = apiResults.filter(creature => !localResults.some(local => local.slug === creature.slug)) //Desduplicate
     let lists = {
         local: localResults,
@@ -147,20 +147,21 @@ async function searchMonster(monsterName){
 }
 
 async function selectSlugFromResults(results){
-    var monsterSlug = 0
-    if(results.local.length == 0 && results.api.length == 0){return 0}
+    if(results.local.length == 0 && results.api.length == 0){
+        console.log("cero results")    
+        return 0
+    }
     if(results.local.length == 1 && results.api.length == 0){
-        monsterSlug = results.local[0].slug
+        return results.local[0].slug
     }
      if(results.local.length == 0 && results.api.length == 1){
-        monsterSlug = results.api[0].slug
+        return results.api[0].slug
     }
     else{
         const monster =  await chooseMonster(results)
         if(!monster){return null}
-        monsterSlug = monster.slug
+        return monster.slug
     } 
-    return monsterSlug
 }
 async function getMonster(monsterSlug){
     if(monsterSlug == 0){return monsterSlug}

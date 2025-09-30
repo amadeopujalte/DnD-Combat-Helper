@@ -7,13 +7,13 @@ function highlightCurrentCreature(index){
     if(Unit.combatList.length == 0){return}
     const table = document.getElementById("table_stats")
     const currentRow = table.querySelector(`tr[data-index="${index}"]`)
+    if (!currentRow){return}
     if(index > 0){
         const formerRow = table.querySelector(`tr[data-index="${index -1}"]`)
         formerRow.classList.remove("highlight")
     }
         currentRow.classList.add("highlight")
 }
-
 function renderTable(){
     const tbody = document.getElementById("table_stats")
     tbody.innerHTML= ""
@@ -70,7 +70,7 @@ function renderTable(){
         tbody.appendChild(row)
     })
         highlightCurrentCreature(i)
-        console.log("Tabla renderizada")
+        console.log("Table rendered")
 }
 
 function addNewUnit(){
@@ -265,35 +265,62 @@ function next(index){
     else{index += 1}
     checkConditions(index,true)
     console.log("next")
-    console.log("index now", index)
+    //console.log("index now", index)
     return index
 }
+function isWriting(targetOfEvent){
+    const typing = targetOfEvent.tagName === "INPUT" || targetOfEvent.tagName === "TEXTAREA" || targetOfEvent.isContentEditable
+    return typing
+}
 //Buttons
-// Start Combat Button
-document.getElementById("start_combat").addEventListener("click", () => {
+function startCombatButtonBehaviour(){
     console.log("starting combat")
-    console.log("combatlist", Unit.combatList)
-    console.log("unitList", Unit.unitList)
+   // console.log("combatlist", Unit.combatList)
+   // console.log("unitList", Unit.unitList)
     i = startCombat()
-    renderCreatureInfo(i,"current_statBlock")})
+    renderCreatureInfo(i,"current_statBlock")
+}
+// Start Combat Button
+document.getElementById("start_combat").addEventListener("click", startCombatButtonBehaviour)
+//Shortcut
+document.addEventListener("keydown", (e) => {
+    const t = e.target
+    if(!isWriting(t) && e.key.toLowerCase() === "e"){startCombatButtonBehaviour()}
+})
 // Next button
-document.getElementById("next").addEventListener("click", () =>{ 
+function nextButtonBehavior(){
     i = next(i)
     renderTable()
     renderCreatureInfo(i,"current_statBlock")
-    })
+}
+document.getElementById("next").addEventListener("click", nextButtonBehavior)
+//Shortcut
+document.addEventListener("keydown", (e) =>{
+    const t = e.target
+    if(!isWriting(t) && e.key.toLowerCase() === "n"){nextButtonBehavior()}
+})
 //New Unit button
 document.getElementById("new_unit").addEventListener("click", addNewUnit)
+//Shortcut
+document.addEventListener("keyup", (e) => {
+    const t = e.target
+    if(!isWriting(t) && e.key.toLowerCase() === "u"){addNewUnit()}
+})
 //Sort Button
-document.getElementById("sort").addEventListener("click", () =>{
+function sortButtonBehavior(){
     if(!Unit.unitList){return}
     Unit.sortUnitList()
     Unit.sortCombatList()
     renderTable()
-    renderCreatureInfo(i,"current_statBlock")})
-
-//New player button 
-document.getElementById("new_player").addEventListener("click", () => {
+    renderCreatureInfo(i,"current_statBlock")
+}
+document.getElementById("sort").addEventListener("click", sortButtonBehavior)
+//Shortcut
+document.addEventListener("keydown", (e) => {
+    const t = e.target
+    if(!isWriting(t) && e.key.toLowerCase() === "s"){sortButtonBehavior()}
+})
+function newPlayer(){
     const form = document.createElement("form")
     form.id = "playerForm"
 
@@ -364,16 +391,33 @@ document.getElementById("new_player").addEventListener("click", () => {
         form.remove()     
         })
     form.appendChild(cancelBtn)
+
+}
+//New player button 
+document.getElementById("new_player").addEventListener("click", newPlayer)
+//Shortcut
+document.addEventListener("keyup", (e) => {
+    const t = e.target
+    if(!isWriting(t) && e.key.toLowerCase() == "p"){newPlayer()}
 })
 
-//Eliminate current creature Button
-document.getElementById("eliminate").addEventListener("click", () => {
+function eliminateCurrentCreature(){
     if(!Unit.unitList[i]){return}
     Unit.unitList.splice(i,1) 
     Unit.combatList.splice(i,1)
+    if (i >= Unit.unitList.length) {
+        i = Unit.unitList.length - 1;
+    }
     renderTable()
     renderCreatureInfo(i,"current_statBlock")
-})
+}
+//Eliminate current creature Button
+document.getElementById("eliminate").addEventListener("click", eliminateCurrentCreature)
+//Shortcut
+document.addEventListener("keydown", (e) => {
+    const t = e.target
+    if (!isWriting(t) && e.key === "Backspace") {eliminateCurrentCreature()}})
+
 //RemoveEffect buttons
 document.getElementById("table_stats").addEventListener("click", (event) =>{
     if(event.target.matches(".removeEffect")){
@@ -389,8 +433,7 @@ document.getElementById("table_stats").addEventListener("click", (event) => {
      if(event.target.matches(".seeStats")){
     const btn = event.target
     const unit = Number(btn.dataset.unit);
-    renderCreatureInfo(unit,"viewer_statBlock")
-    
+    renderCreatureInfo(unit,"viewer_statBlock")    
 }
 })
 
@@ -701,7 +744,7 @@ document.getElementById("create_homebrew").addEventListener("click" , () =>{
     })
 document.getElementById("submit").addEventListener( "click" , () =>{
         const requiredFields = document.querySelectorAll("#monster_form [required]")
-        console.log(requiredFields)
+        //console.log(requiredFields)
         const array = Array.from(requiredFields)
         if(array.some( e => e.value == "")){
             const missingFields = array.filter( e => e.value === "") 
@@ -816,10 +859,4 @@ function makeDialog(results){
     //console.log("Make dialog result: ", monster)
     return monster
 }
-
-//Shortcuts for buttons
-//footer with email and posibile donation and how to use.
-//Virtual Dices
-//Investigar como hacer para que aparezca en top results al buscar en google
-//Publish!!!!
 

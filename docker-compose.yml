@@ -1,0 +1,8 @@
+version: '3.8'
+services:
+  dnd-combat-helper:
+    build: .
+    container_name: dnd-combat-helper
+    ports:
+      - "8080:80"
+    restart: unless-stopped

@@ -110,7 +110,7 @@ function sortUnitList(){
         }
         else{
             console.log("sorting by dex")
-            return Number(b.dex) - Number(a.dex)}  //se desempata por quien tiene mas dex
+            return Number(b.dex) - Number(a.dex)}  
     })
     console.log("sorting...")
 }

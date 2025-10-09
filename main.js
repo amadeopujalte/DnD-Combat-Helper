@@ -362,7 +362,6 @@ function newPlayer(){
 
     document.getElementById("table").appendChild(form)
     inputName.focus()
-    // Listener del form
     form.addEventListener("submit", (event) => {
         event.preventDefault() 
         if (!form.checkValidity()) {
@@ -778,7 +777,6 @@ window.addEventListener("beforeunload", () => {
     localStorage.setItem("creatureList", JSON.stringify(Creature.creatureList))
 })
 
-//Both lists should start empty or else this may duplicate items
 window.addEventListener("DOMContentLoaded", () => {
     const hbl = JSON.parse(localStorage.getItem("homebrewList"))
     const cl = JSON.parse(localStorage.getItem("creatureList"))
@@ -950,8 +948,3 @@ d6btn.addEventListener("click", () => diceBehavior(d6(), d6btn))
 d4btn.addEventListener("click", () => diceBehavior(d4(), d4btn))
 d100btn.addEventListener("click", () => diceBehavior(d100(), d100btn))
 
-//FIX position of dice container
-//animation does not appear
-//git pushear
-//Investigar como hacer para que aparezca en top results al buscar en google
-//Publish!!!!

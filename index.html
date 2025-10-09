@@ -15,8 +15,20 @@
         </header>
         <div id="container">
             <div id="table">
+                <div id="table_buttons">
+                    <button id="new_unit" title= "Shortcut [u]"> +New unit </button>
+                    <button id="sort" title= "Shortcut [s]"> Sort </button>
+                    <button id="start_combat" title= "Shortcut [e]" > Start Combat </button>
+                    <button id="next" title= "Shortcut [n]"> Next </button>
+                    <button id="new_player" title= "Shortcut [p]" > New Player </button>
+                    <button id="eliminate" title= "Shortcut [backspace]"> Eliminate current creature </button>   
+                </div>    
+                <div id="dice_ui">
+                        <button id="dice_toggle" title="View dices"> <img src="assets/d20.png"> </button> 
+                        <div id= "dice_container"></div>
+                    </div>
                 <table>
-                    <thead>
+                    <thead id="thead">
                         <tr>
                             <th>Initiative</th>
                             <th>Name</th>
@@ -26,12 +38,6 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <button id="new_unit" title= "Shortcut [u]"> +New unit </button>
-                    <button id="sort" title= "Shortcut [s]"> Sort </button>
-                    <button id="start_combat" title= "Shortcut [e]" > Start Combat </button>
-                    <button id="next" title= "Shortcut [n]"> Next </button>
-                    <button id="new_player" title= "Shortcut [p]" > New Player </button>
-                    <button id="eliminate" title= "Shortcut [backspace]"> Eliminate current creature </button>
                     <tbody id="table_stats">
                     <!-- Aquí se agregarán las filas dinámicamente -->
                     </tbody>
@@ -106,8 +112,6 @@
                         
 
                     </div>
-
-
 
                     <!-- Damage immunities -->
                     <h3>Damage Immunities</h3>
@@ -198,6 +202,17 @@
             </div>
         <script type="module" src="main.js" defer></script>        
         </div>
+    <footer>
+        <p>
+            All monsters come from <a href="https://open5e.com" target="_blank">Open5e</a>. If the one you need isn’t there, you can always make your own with Create Homebrew.
+             Imported monsters are currently saved locally so the app runs faster, and anything you create is also stored in your browser’s local storage. Just keep in mind: if you clear site data, your homebrews will vanish too. No homebrews? Then there’s nothing to worry about!
+        </p>
+        <p>
+            Report issues and bugs in:
+                <a href="https://github.com/amadeopujalte/DnD-Combat-Helper/issues" target="_blank">Github</a>
+                or <a href="mailto:dndcombathelper@gmail.com" target="_blank">dndcombathelper@gmail.com</a>.
+        </p>
+    </footer>
     </body>
 </html>
 

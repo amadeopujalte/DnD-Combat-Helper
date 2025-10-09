@@ -493,7 +493,7 @@ document.querySelector("#table_stats").addEventListener("click", (event) => {
         })
     }
     else if(field == "stateAndEffects"){
-        input.remove() //Como uso el form este no me sirve    
+        input.remove() //Not neccesary as its uses the code    
         const form = document.createElement("form")
     
         const conditionInput = document.createElement("input")
@@ -602,7 +602,8 @@ document.querySelector("#table_stats").addEventListener("click", (event) => {
         cancel.textContent = "cancel"
         cancel.addEventListener("click", () =>{
             form.reset()
-            renderTable()
+            form.remove()
+            //renderTable()
         })
         form.appendChild(cancel)
         cell.appendChild(form)
@@ -704,7 +705,7 @@ document.getElementById("eliminate_homebrew").addEventListener( "click", () =>{
         const input = document.createElement("input")
         input.type = "text"
         input.placeholder = "Homebrew's name"
-        document.getElementById("eliminate_homebrew").appendChild(input)
+        document.getElementById("table").appendChild(input)
         input.focus()
         input.addEventListener("keydown", (e) => {
             if (e.key === "Enter") {
@@ -854,9 +855,103 @@ function makeDialog(results){
     })
   })
 }
- export async function chooseMonster(results){
+export async function chooseMonster(results){
     const monster =  await makeDialog(results)
     //console.log("Make dialog result: ", monster)
     return monster
 }
+//Virtual Dices
+const dice_container = document.getElementById("dice_container")
+dice_container.style.display = "none"
 
+function createDiceRowButton(id, imgSrc) {
+    const row = document.createElement("div")
+    row.className = "dice-row"
+    const btn = document.createElement("button")
+    btn.title = id
+    btn.id = id
+    btn.className = "dice"
+    btn.innerHTML = `<img src="${imgSrc}">`
+
+    row.appendChild(btn)
+    dice_container.appendChild(row)
+    return btn
+}
+const d20btn  = createDiceRowButton("d20",  "assets/d20.png")
+const d12btn  = createDiceRowButton("d12",  "assets/d12.png")
+const d10btn  = createDiceRowButton("d10",  "assets/d10.png")
+const d8btn   = createDiceRowButton("d8",   "assets/d8.png")
+const d6btn   = createDiceRowButton("d6",   "assets/d6.png")
+const d4btn   = createDiceRowButton("d4",   "assets/d4.png")
+const d100btn = createDiceRowButton("d100", "assets/d100.png")
+   
+var toggle = false
+
+const dice_toggle = document.getElementById("dice_toggle")
+
+dice_toggle.addEventListener("click", () => {
+    toggle = !toggle
+    dice_container.style.display = toggle ? "flex" : "none"
+})
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+function diceBehavior(roll,btn){
+    const rolldiv = document.createElement("div")
+    rolldiv.innerHTML = '<img src="assets/rollingDice.png" style="width: 35px; height: 40px;">'
+    rolldiv.style.width = "35px"
+    rolldiv.style.height = "35px"
+    rolldiv.style.marginRight = "6px" 
+    btn.parentNode.insertBefore(rolldiv, btn)
+
+const otherDices = Array.from(dice_container.querySelectorAll('button')).filter(e => e !== btn)
+    otherDices.forEach(e => {
+        let slot = document.createElement("div")
+        slot.style.width = "35px"
+        slot.style.height = "35px"
+        slot.style.marginRight = "6px"
+        slot.classList.add("temp-slot")
+        e.parentNode.insertBefore(slot, e) 
+    })
+    rolldiv.classList.add("roll")
+    rolldiv.addEventListener('animationend', async () => {
+        rolldiv.textContent = roll
+        rolldiv.style.display = "flex"
+        rolldiv.style.alignItems = "center"
+        rolldiv.style.justifyContent = "center"
+        rolldiv.style.border = "1px solid black";
+        rolldiv.style.backgroundColor = "#d14a1a"
+        await sleep(5000)
+        rolldiv.remove()
+        Array.from(dice_container.querySelectorAll('.temp-slot')).forEach(e => e.remove())
+             
+    })
+}
+function d20(){return getRandomIntInclusive(1,20)}
+function d12(){return getRandomIntInclusive(1,12)}
+function d10(){return getRandomIntInclusive(1,10)}
+function d8(){return getRandomIntInclusive(1,8)}
+function d6(){return getRandomIntInclusive(1,6)}
+function d4(){return getRandomIntInclusive(1,4)}
+function d100(){return getRandomIntInclusive(1,100)}
+
+function getRandomIntInclusive(min, max) {
+    const minCeiled = Math.ceil(min)
+    const maxFloored = Math.floor(max)
+    return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled)
+}
+
+d20btn.addEventListener("click", () => diceBehavior(d20(), d20btn))
+d12btn.addEventListener("click", () => diceBehavior(d12(), d12btn))
+d10btn.addEventListener("click", () => diceBehavior(d10(), d10btn))
+d8btn.addEventListener("click", () => diceBehavior(d8(), d8btn))
+d6btn.addEventListener("click", () => diceBehavior(d6(), d6btn))
+d4btn.addEventListener("click", () => diceBehavior(d4(), d4btn))
+d100btn.addEventListener("click", () => diceBehavior(d100(), d100btn))
+
+//FIX position of dice container
+//animation does not appear
+//git pushear
+//Investigar como hacer para que aparezca en top results al buscar en google
+//Publish!!!!

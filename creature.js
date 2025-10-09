@@ -50,7 +50,6 @@ class Creature {
       burrow: speed.burrow || 0,
       fly: speed.fly || 0
     }
-
     this.actions = actions
     this.legendarySlots = legendarySlots
     this.stats = stats
@@ -61,40 +60,16 @@ class Creature {
     this.traits = traits
     this.hit_dice = hit_dice
     this.init = Math.floor((stats.dexterity-10)/2) //Initiative
-    this.initiativeRoll
+    this.initiativeRoll = null
     this.document__title = document__title
   }
-    d20(){
-       var roll = this.getRandomIntInclusive(1,20)
-        return roll
-        }
-    d12(){
-        var roll = this.getRandomIntInclusive(1,12)
-        return roll
-        }
-    d10(){
-        //The d10 also represents the percentile dice. 
-        var roll = this.getRandomIntInclusive(1,12)
-        return roll
-        }
-    d8(){
-        var roll = this.getRandomIntInclusive(1,12)
-        return roll
-        }
-     d6(){
-        var roll = this.getRandomIntInclusive(1,12)
-        return roll
-        }
-     d4(){
-        var roll = this.getRandomIntInclusive(1,4)
-        return roll
-        }
 
     getRandomIntInclusive(min, max) {
         const minCeiled = Math.ceil(min)
         const maxFloored = Math.floor(max)
-        return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); // The maximum is inclusive and the minimum is inclusive
+        return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled)
     }
+    d20(){return this.getRandomIntInclusive(1,20)}
 }
 
 let creatureList = []
@@ -288,7 +263,7 @@ function convertToCreature(monsterData) {
     senses = "",
     document__title
   } = monsterData;
-    // 1. Unificar acciones, hechizos y acciones legendarias
+    // Unifies actions, spells and legendary actions
   const allActions = [
     ...actions,
     ...spell_list.map(spell => {
@@ -304,7 +279,6 @@ function convertToCreature(monsterData) {
     }))
   ];
 
-  // 2. Construir stats
     let stats
         if(monsterData.stats){
              stats = {
@@ -327,7 +301,6 @@ function convertToCreature(monsterData) {
         }
     }
 
-    //Saves
     let saves
     if(monsterData.saves){
          saves = {
@@ -350,7 +323,6 @@ function convertToCreature(monsterData) {
     }
 
     }
-  // 3. Traits: convertir special_abilities y senses
   const traits = [
     ...(special_abilities || []).map(t => ({
       name: t.name,
@@ -362,7 +334,6 @@ function convertToCreature(monsterData) {
     }] : [])
   ]
 
-  // 5. Resistencias, inmunidades y vulnerabilidades como arrays
   const resistances = parseDelimitedList(damage_resistances)
   const immunities = [
     ...parseDelimitedList(damage_immunities),
@@ -370,7 +341,6 @@ function convertToCreature(monsterData) {
   ];
   const vulnerabilities = parseDelimitedList(damage_vulnerabilities) 
 
-  // 6. Crear instancia
   return new Creature({
     slug,
     name,
@@ -392,7 +362,6 @@ function convertToCreature(monsterData) {
   });
 }
 
-// Helper para convertir strings en arrays limpios
 function parseDelimitedList(input) {
   if (!input || typeof input !== 'string') return [];
   return input

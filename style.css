@@ -150,9 +150,6 @@ button:not(.dice):hover{
     flex-direction: column;
     gap: 8px;
     padding: 6px;
-    background: rgba(0,0,0,0.55);
-    border: 1px solid #888;
-    border-radius: 6px;
     z-index: 1200;    /* over the table */
 }
 #dice_ui{

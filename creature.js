@@ -20,7 +20,7 @@ class Creature {
     slug,    
     name,
     type,
-    languages, //expected {common, spanish, etc.}
+    languages, //{orc, common , ...}
     hit_points,
     armor_class,
     speed,         // expected: { walk, swim, burrow, fly }
@@ -43,7 +43,6 @@ class Creature {
     this.hit_points = hit_points
     this.armor_class = armor_class
 
-    // Velocidades individuales (null si no tiene)
     this.speed = {
       walk: speed.walk || 0,
       swim: speed.swim || 0,

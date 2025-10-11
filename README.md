@@ -35,6 +35,7 @@ The tool is currently in an active **development and testing phase **, and alrea
 ## 🧩 Coming Soon
 Planned features include:
 - 🎨 Visual and UX improvements to make the tool more user-friendly
+- 📱 Make it usable for phones
 ---
 
 ## 💡 Notes

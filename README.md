@@ -40,7 +40,7 @@ Planned features include:
 
 ## 💡 Notes
 
-- 🖥️ Tool available at: https://amadeopujalte.github.io/DnD-Combat-Helper/ !
--https://amadeopujalte.github.io/DnD-Combat-Helper/ 🧭 This project is inspired by the **D&D Beyond Combat Tracker**, but aims for a **simpler, more streamlined interface**.  
+- 🖥️ Tool available at: https://amadeopujalte.github.io/DnD-Combat-Helper/ 
+- 🧭 This project is inspired by the **D&D Beyond Combat Tracker**, but aims for a **simpler, more streamlined interface**.  
 - 🛠️ It is also a **learning project** for web development—focused on practicing JavaScript, DOM manipulation, and dynamic UI generation.  
 - **Hope you like it! 😊**

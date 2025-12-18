@@ -1,4 +1,5 @@
 html, body { height: 100%; margin: 0; }
+
 body { 
     display: flex; 
     flex-direction: column; 
@@ -20,12 +21,13 @@ header {
 footer{
     margin-top: 70px;
     background-color: #7a5c2f;   
-    color: #fefaf3;              
+    color: #fefaf4;              
     padding: 15px 10px;          
     text-align: center;          
     font-size: 16px;             
     line-height: 1.6;            
 }
+
 #container {
     background-image:url("assets/papiro.png") ;
     display: grid;
@@ -45,16 +47,16 @@ footer{
     overflow-y: auto;
     position: relative; 
     text-shadow: 1px 1px 2px #000;
-
 }
 
-.table_buttons{
+#table_buttons{
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 8px;
   position: relative;
 }
+
 th, td {
     border: 1px solid #ffff ;
     color: #ffff;
@@ -65,9 +67,11 @@ th, td {
   outline: 3px solid goldenrod;  
   outline-offset: -3px;     
 }
+
 #round_counter{
     color: #ffff;
 }
+
 #creature_stats {
     grid-column: 2 / 3;
     border-left: 1px solid #ccc;
@@ -76,6 +80,7 @@ th, td {
     gap: 10px;         
     align-items: flex-start;
 }
+
 #current_statBlock, #viewer_statBlock {
   flex: 1 1 50%;
   max-height: 500px;   
@@ -92,7 +97,6 @@ th, td {
 #viewer_statBlock .closeBtn {
   display: inline-block;
   margin-left: 90%;
-  
 }
 
 #create_homebrew_form {
@@ -101,16 +105,17 @@ th, td {
     min-height: 0;      
     display: none;
 }
+
 button {
     background: none;
     color: #ffff;
     border: 1px solid #ffff;
 }
+
 button:not(.dice):hover{
     background: transparent;
     border: 1px solid goldenrod;  
     color: #f0f0f0;
-    /*padding: 4px 2px;*/
 }
 
 .dialog{
@@ -120,7 +125,8 @@ button:not(.dice):hover{
     background-position: center;
     color: #f5e6b3;
     text-shadow: 1px 1px 2px #000;
-    }
+}
+
 .dialog section:nth-of-type(2) {
   margin-left: 40px; 
 }
@@ -132,10 +138,12 @@ button:not(.dice):hover{
   padding: 6px 12px;
   border-radius: 4px;
 }
+
 .dialog button:hover {
   background: #8ca0b3; 
   color: #1a1a1a;      
 }
+
 .dialog li:hover {
   border: 1px solid #8ca0b3;  
   background: rgba(255, 255, 255, 0.1);
@@ -144,24 +152,27 @@ button:not(.dice):hover{
 
 #dice_container {
     position: absolute;
-    top: 45px;        /* just below the toggle */
+    top: 45px;
     right: 0;
     display: flex;
     flex-direction: column;
     gap: 8px;
     padding: 6px;
-    z-index: 1200;    /* over the table */
+    z-index: 1200;
 }
+
 #dice_ui{
   position: absolute;
   top: 8px;
   right: 8px;
 }
+
 .dice-row {
     display: flex; 
     align-items: center;
     gap: 6px;
 }
+
 #dice_toggle{
     width: 35px;            
     height: 35px;
@@ -171,22 +182,27 @@ button:not(.dice):hover{
     flex: 0 0 35px;           
     justify-content: center;
 }
+
 #dice_toggle img {
   width: 100%;      
   height: 100%;
   object-fit: contain;
 }
+
 .dice-row .dice {
   flex: 0 0 auto;          
 }
+
 .dice {
     all: unset;
-     width: 35px;      
+    width: 35px;      
     height: 35px;
     cursor: pointer;
 }
+
 .dice img{
-  width: 100%; height: 100%;
+  width: 100%; 
+  height: 100%;
   object-fit: contain;
   display: block;
 }
@@ -205,3 +221,58 @@ button:not(.dice):hover{
     to   { transform: rotate(360deg); }
 }
 
+/* ===== MOBILE =========*/
+
+@media (max-width: 600px){
+
+  #container{
+    grid-template-columns: 1fr;
+  }
+
+  #creature_stats{
+    grid-column: 1 / 2;
+    border-left: none;
+    padding-left: 0;
+  }
+
+  #table_buttons{
+    gap: 6px;
+    padding: 4px;
+  }
+
+  #table_buttons button{
+    font-size: 11px;
+    padding: 4px 6px;
+  }
+
+  table{
+    font-size: 12px;
+  }
+
+  th, td{
+    padding: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  #round_counter{
+    font-size: 12px;
+  }
+
+  #create_homebrew,
+  #eliminate_homebrew{
+    width: 100%;
+    font-size: 12px;
+    padding: 6px;
+  }
+
+.dialog{
+    width: 92vw;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  #dice_ui{
+    top: 4px;
+    right: 4px;
+  }
+}

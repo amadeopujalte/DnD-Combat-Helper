@@ -35,11 +35,12 @@ The tool is currently in an active **development and testing phase **, and alrea
 ## 🧩 Coming Soon
 Planned features include:
 - 🎨 Visual and UX improvements to make the tool more user-friendly
+- 📱 Make it usable for phones
 ---
 
 ## 💡 Notes
 
-- 🖥️ The tool is intended to be released publicly through GitHub Pages. but for now, it can be used **locally** via a simple development server (e.g. using Python, Node.js, or VS Code Live Server).  
+- 🖥️ Tool available at: https://amadeopujalte.github.io/DnD-Combat-Helper/ 
 - 🧭 This project is inspired by the **D&D Beyond Combat Tracker**, but aims for a **simpler, more streamlined interface**.  
 - 🛠️ It is also a **learning project** for web development—focused on practicing JavaScript, DOM manipulation, and dynamic UI generation.  
 - **Hope you like it! 😊**

@@ -30,13 +30,11 @@ The tool is currently in an active **development and testing phase **, and alrea
 - ✅ View any creature’s stat block, even off-turn.” 
 - ✅ Unify monster search across Open5e sources (name query).
 - ✅ Virtual dices
+- ✅ usable in phones
 ---
 
 ## 🧩 Coming Soon
-Planned features include:
-- 🎨 Visual and UX improvements to make the tool more user-friendly
-- 📱 Make it usable for phones
----
+No planned features at the moment.
 
 ## 💡 Notes
 

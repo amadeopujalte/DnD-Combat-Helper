@@ -4,14 +4,14 @@ body {
     display: flex; 
     flex-direction: column; 
     overflow: auto;
-    background-image: url("assets/papiro.png");
+    background-image: url("assets/papiro.webp");
 }
 
 header {
   top: 0;
   z-index: 1000;
   height: 120px; 
-  background-image: url("assets/logo.png");
+  background-image: url("assets/logo.webp");
   background-repeat: no-repeat;
   background-position: left;   
   background-size: contain;   
@@ -29,7 +29,7 @@ footer{
 }
 
 #container {
-    background-image:url("assets/papiro.png") ;
+    background-image:url("assets/papiro.webp") ;
     display: grid;
     grid-template-columns: 1fr 600px;
     gap: 6px;
@@ -40,7 +40,7 @@ footer{
     grid-column: 1 / 2; 
     width: 100%;
     border-collapse: collapse;
-    background-image: url("assets/dragonfondo.png");
+    background-image: url("assets/dragonfondo.webp");
     background-repeat: no-repeat;
     background-size: 100% 100%;
     background-position: center;
@@ -56,8 +56,20 @@ footer{
   padding: 8px;
   position: relative;
 }
+#table_buttons button {
+  background: rgba(120, 75, 35, 0.70);
+  color: #ffff;
+  cursor: pointer;
+}
+#create_homebrew,
+  #eliminate_homebrew,
+  #show_homebrews{
+    background: rgba(120, 75, 35, 0.70);
+  }
 
 th, td {
+    background: rgba(120, 75, 35, 0.70);
+    color: #2b1a10;
     border: 1px solid #ffff ;
     color: #ffff;
     padding: 10px;
@@ -110,6 +122,8 @@ button {
     background: none;
     color: #ffff;
     border: 1px solid #ffff;
+    border-radius: 50px;
+    font-weight: 500;
 }
 
 button:not(.dice):hover{
@@ -119,7 +133,7 @@ button:not(.dice):hover{
 }
 
 .dialog{
-    background-image: url("assets/fondoDialog.png");
+    background-image: url("assets/fondoDialog.webp");
     background-repeat: no-repeat;
     background-size: 100% 100%;
     background-position: center;
@@ -136,7 +150,7 @@ button:not(.dice):hover{
   border: 1px solid #f0f0f0;
   color: #f0f0f0;
   padding: 6px 12px;
-  border-radius: 4px;
+  border-radius: 50px;
 }
 
 .dialog button:hover {
@@ -148,6 +162,11 @@ button:not(.dice):hover{
   border: 1px solid #8ca0b3;  
   background: rgba(255, 255, 255, 0.1);
   cursor: pointer;
+}
+.homebrew-dialog li:hover {
+  border: none;
+  background: transparent;
+  cursor: default;
 }
 
 #dice_container {
@@ -219,6 +238,33 @@ button:not(.dice):hover{
 @keyframes roll{
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }
+}
+
+
+.loading_spinner {
+  width: 24px;
+  height: 24px;
+  border: 4px solid rgba(43, 26, 16, 0.25);
+  border-top: 4px solid #2b1a10;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+.hidden {
+  display: none;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ===== MOBILE =========*/

@@ -57,26 +57,20 @@ function compareIfPlayer(a,b){
 function sortCombatList(){
     combatList.sort((a,b) => {
         if(a.initiative || b.initiative){
-            console.log("One is player")
             return compareIfPlayer(a,b)
         }
         if(b.initiativeRoll !== a.initiativeRoll){
-            console.log("Sorting two non players")
             return b.initiativeRoll - a.initiativeRoll
         }
         else{
-             console.log("Sorting by dex in combatlist")
-             console.log(b.name, b.stats.dexterity, a.name, a.stats.dexterity)
              return Number(b.stats.dexterity) - Number(a.stats.dexterity)}  //se desempata por quien tiene mas dex
     })
 }
 
 async function addMonsterToCombatList(monsterName){
-    console.log("Searching monster")
     const results = await Creature.searchMonster(monsterName)
     const monsterSlug = await Creature.selectSlugFromResults(results) //This await simply unwrapps the value form the promise. it does not have to wait
     if(monsterSlug == null){return 0}
-    //console.log("monsterSlug in AddMonsterTocomabtList: ",monsterSlug)
     let monster = 0
     if(monsterSlug){ 
         monster = await Creature.getMonster(monsterSlug)
@@ -85,19 +79,25 @@ async function addMonsterToCombatList(monsterName){
         combatList.push(monster)
     }
     else{
-        alert("Monster could not be added, Reason: doesnt exist or error connecting to API")
-        console.log("Monster could not be added")
+        alert("Monster could not be added, Reason: does not exist or error connecting to API")
         return 0 // Control value
     }
 }
 
 let unitList = []
 
+function getRandomIntInclusive(min, max) {
+        const minCeiled = Math.ceil(min)
+        const maxFloored = Math.floor(max)
+        return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled)
+}
+
+function d20(){return getRandomIntInclusive(1,20)}
 function createUnits(){
         var index = combatList.length
         const e = combatList[index -1] 
       //  console.log("Element e is:",e)
-        const unit = new Unit(e.name, e.hit_points, e.armor_class, (e.init + e.d20()), e.stats.dexterity)
+        const unit = new Unit(e.name, e.hit_points, e.armor_class, (e.init + d20()), e.stats.dexterity)
         e.initiativeRoll = unit.initiative
         unitList.push(unit)
 }
@@ -109,10 +109,8 @@ function sortUnitList(){
             return b.initiative - a.initiative
         }
         else{
-            console.log("sorting by dex")
             return Number(b.dex) - Number(a.dex)}  
     })
-    console.log("sorting...")
 }
 async function newUnit(monsterName){
     const control = await addMonsterToCombatList(monsterName)

@@ -17,12 +17,13 @@ class Trait {
 
 class Creature {
   constructor({
-    slug,    
+    key,    
     name,
     type,
     languages, //{orc, common , ...}
     hit_points,
     armor_class,
+    cr,
     speed,         // expected: { walk, swim, burrow, fly }
     actions = [], //actions, spells, special abilities and legendary actions
     legendarySlots, //String expected 
@@ -32,21 +33,23 @@ class Creature {
     immunities = [],
     vulnerabilities = [],
     traits,
-    features,
     hit_dice,
+    init,
     document__title
   }) {
-    this.slug = slug
+    this.key = key
     this.name = name
     this.type = type
     this.languages = languages
     this.hit_points = hit_points
     this.armor_class = armor_class
+    this.cr = cr
 
     this.speed = {
       walk: speed.walk || 0,
       swim: speed.swim || 0,
       burrow: speed.burrow || 0,
+      climb: speed.burrow || 0,
       fly: speed.fly || 0
     }
     this.actions = actions
@@ -58,26 +61,16 @@ class Creature {
     this.vulnerabilities = vulnerabilities
     this.traits = traits
     this.hit_dice = hit_dice
-    this.init = Math.floor((stats.dexterity-10)/2) //Initiative
+    this.init = init //Initiative
     this.initiativeRoll = null
     this.document__title = document__title
   }
 
-    getRandomIntInclusive(min, max) {
-        const minCeiled = Math.ceil(min)
-        const maxFloored = Math.floor(max)
-        return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled)
-    }
-    d20(){return this.getRandomIntInclusive(1,20)}
 }
 
 let creatureList = []
 let homebrewCreatureList = []
 
-function transformIntoSlug(monsterName){
-    var slug =  monsterName.toLowerCase().replaceAll(' ', '-')
-    return slug
-}
 function normalizeName(monsterName){
     var normalized = (monsterName.toLowerCase().split(/\s+/)).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")
     .trim()
@@ -85,7 +78,7 @@ function normalizeName(monsterName){
 }
 async function filterApiByName(monsterName){
     try{
-    const response = await fetch(`https://api.open5e.com/v1/monsters/?search=${monsterName}&limit=80`)
+    const response = await fetch(`https://api.open5e.com/v2/creatures/?name__icontains=${monsterName}&limit=20`)
     var data = await response.json()
     var monsterList = data.results.filter(creature => creature.name.includes(monsterName))
     //console.log(data)
@@ -112,7 +105,7 @@ async function searchMonster(monsterName){
     var name = normalizeName(monsterName)
     let localResults = filterLocalByName(name)
     let apiResults = await filterApiByName(name)
-    apiResults = apiResults.filter(creature => !localResults.some(local => local.slug === creature.slug)) //Desduplicate
+    apiResults = apiResults.filter(creature => !localResults.some(local => local.key === creature.key)) //Desduplicate
     let lists = {
         local: localResults,
         api: apiResults
@@ -126,22 +119,24 @@ async function selectSlugFromResults(results){
         return 0
     }
     if(results.local.length == 1 && results.api.length == 0){
-        return results.local[0].slug
+        return results.local[0].key
     }
      if(results.local.length == 0 && results.api.length == 1){
-        return results.api[0].slug
+        return results.api[0].key
     }
     else{
         const monster =  await chooseMonster(results)
         if(!monster){return null}
-        return monster.slug
+        return monster.key
     } 
 }
-async function getMonster(monsterSlug){
-    if(monsterSlug == 0){return monsterSlug}
-    var monster =  creatureList.find(p => p.slug === monsterSlug) || homebrewCreatureList.find(p => p.slug === monsterSlug)
+async function getMonster(monsterKey){
+  //console.log(monsterKey)
+    if(monsterKey == 0){return monsterKey}
+    var monster =  creatureList.find(p => p.key === monsterKey) || homebrewCreatureList.find(p => p.key === monsterKey)
     if(!monster){
-            monster = await fetchMonster(monsterSlug)
+            //console.log("fetching monster")
+            monster = await fetchMonster(monsterKey)
             if(monster!== 0){
                 monster = convertToCreature(monster)
                 creatureList.push(monster)
@@ -149,12 +144,13 @@ async function getMonster(monsterSlug){
     }
     return monster
         }
-async function fetchMonster(monsterSlug){
-    console.log("getting monster by api")
+async function fetchMonster(monsterKey){
+    //console.log("getting monster by api")
     try{
-    const response = await fetch(`https://api.open5e.com/v1/monsters/${monsterSlug}/`)
+    const response = await fetch(`https://api.open5e.com/v2/creatures/${monsterKey}`)
     var data = await response.json()
     var monster = data
+    //console.log("Monster fetched: ", monster)
     if(response.ok === true){
         return monster
     }
@@ -169,204 +165,172 @@ async function fetchMonster(monsterSlug){
 }
 
 function createHomebrew(info){
-
-let monster = {
-    slug: transformIntoSlug(info.get("name")),
-    name: info.get("name"),
-    type: info.get("type"),
-    languages: info.get("languages"),
+  const monster = {
+    key: normalizeName(info.get("name")),
+    name: normalizeName(info.get("name")),
+    type: { name: info.get("type") },
+    languages: { as_string: info.get("languages") },
     hit_points: Number(info.get("hit_points")),
     armor_class: Number(info.get("armor_class")),
+    challenge_rating: Number(info.get("cr")),
     hit_dice: info.get("hit_dice"),
-    speed: {
-        speed_walk: Number(info.get("speed_walk")),
-        speed_climb: Number(info.get("speed_climb")),
-        speed_fly: Number(info.get("speed_fly")),
-        speed_burrow: Number(info.get("speed_burrow"))
+    initiative_bonus: Math.floor(Number((Number(info.get("dexterity") - 10)/2))),
+    speed_all: {
+      walk:   Number(info.get("speed_walk")),
+      fly:    Number(info.get("speed_fly")),
+      climb:  Number(info.get("speed_climb")),
+      burrow: Number(info.get("speed_burrow")),
+      swim:   Number(info.get("speed_swim")),
     },
-    strength: Number(info.get("strength")),
-    dexterity: Number(info.get("dexterity")),
-    constitution: Number(info.get("constitution")),
-    intelligence: Number(info.get("intelligence")),
-    wisdom: Number(info.get("wisdom")),
-    charisma: Number(info.get("charisma")),
-    saves:{
-        strenght_save: Number(info.get("strength_save")),
-        dexteruty_save: Number(info.get("dexterity_save")),
-        constitution_save: Number(info.get("constitution_save")),
-        intelligence_save: Number(info.get("intelligence_save")),
-        wisdom_save: Number(info.get("wisdom_save")),
-        charisma_save: Number(info.get("charisma_save")),
+    ability_scores: {
+      strength:     Number(info.get("strength")),
+      dexterity:    Number(info.get("dexterity")),
+      constitution: Number(info.get("constitution")),
+      intelligence: Number(info.get("intelligence")),
+      wisdom:       Number(info.get("wisdom")),
+      charisma:     Number(info.get("charisma")),
     },
-    damage_resistances: info.getAll("damage_resistances"),
-    damage_immunities: info.getAll("damage_immunities"),
-    damage_vulnerabilities: info.getAll("damage_vulnerabilities"),
-    condition_immunities: info.getAll("condition_immunities"),
-    senses: info.getAll("senses"),
-    
-    actions: info.getAll("action_name").map((name, i) => ({
-        name: name,
-        desc: info.getAll("action_desc")[i]
+    saving_throws_all: {
+      strength:     Number(info.get("strength_save")),
+      dexterity:    Number(info.get("dexterity_save")),
+      constitution: Number(info.get("constitution_save")),
+      intelligence: Number(info.get("intelligence_save")),
+      wisdom:       Number(info.get("wisdom_save")),
+      charisma:     Number(info.get("charisma_save")),
+    },
+    resistances_and_immunities: {
+      damage_resistances:          info.getAll("damage_resistances").map(r => ({ name: r })),
+      damage_immunities:           info.getAll("damage_immunities").map(i => ({ name: i })),
+      damage_vulnerabilities:      info.getAll("damage_vulnerabilities").map(v => ({ name: v })),
+      condition_immunities:        info.getAll("condition_immunities").map(c => ({ name: c })),
+    },
+    senses: info.get("senses") || "",
+    traits: info.getAll("special_ability_name").map((name, i) => ({
+      name,
+      desc: info.getAll("special_ability_desc")[i]
     })),
+    actions: [
+      ...info.getAll("action_name").map((name, i) => ({
+        name,
+        desc: info.getAll("action_desc")[i],
+        action_type: "ACTION",
+        legendary_action_cost: null,
+        order_in_statblock: i + 1,
+      })),
+      ...info.getAll("legendary_action_name").map((name, i) => ({
+        name,
+        desc: info.getAll("legendary_action_desc")[i],
+        action_type: "LEGENDARY_ACTION",
+        legendary_action_cost: 1,
+        order_in_statblock: i + 1,
+      })),
+    ],
     legendarySlots: info.get("legendarySlots"),
-    legendary_actions: info.getAll("legendary_action_name").map((name, i) => ({
-        name: name,
-        desc: info.getAll("legendary_action_desc")[i]
-    })),
+    document: { display_name: "Homebrew" },
+  }
 
-    special_abilities: info.getAll("special_ability_name").map((name, i) => ({
-        name: name,
-        desc: info.getAll("special_ability_desc")[i]
-    })),
-    spell_list: info.getAll("spell_name"),
-    document__title: "homebrew"
-    }
-    const homebrew = convertToCreature(monster)
-    homebrewCreatureList.push(homebrew)
-    console.log(homebrewCreatureList)
+  const homebrew = convertToCreature(monster)
+  homebrewCreatureList.push(homebrew)
+ // console.log(homebrewCreatureList)
+
 }
 
 function removeHomebrew(homebrewName){
-    console.log(homebrewCreatureList)
+   // console.log(homebrewCreatureList)
     var index = homebrewCreatureList.findIndex(e => e.name == homebrewName)
     if(index != -1){
         homebrewCreatureList.splice(index,1)
         alert("Homebrew Eliminated")
-        console.log(homebrewCreatureList)
     }
     else{
         alert(`Homebrew named : ${homebrewName} doesnt exist`)
     }
 }
 function convertToCreature(monsterData) {
-  const {
-    slug,
+ const {
+    key,
     name,
     type,
     languages,
     hit_points,
     armor_class,
+    challenge_rating,
+    initiative_bonus,
     hit_dice,
-    speed = {},
+    speed_all = {},
     actions = [],
-    spell_list = [],
-    legendary_actions = [],
-    legendary_desc,
-    damage_resistances,
-    damage_immunities,
-    damage_vulnerabilities, 
-    condition_immunities,
-    strength, dexterity, constitution, intelligence, wisdom, charisma,
-    strength_save, dexterity_save, constitution_save, intelligence_save, wisdom_save, charisma_save,
-    special_abilities = [],
+    traits = [],
     senses = "",
-    document__title
-  } = monsterData;
-    // Unifies actions, spells and legendary actions
-  const allActions = [
-    ...actions,
-    ...spell_list.map(spell => {
-      const slug = spell.replace("https://api.open5e.com/v2/spells/", "").replaceAll("/", "");
-      return {
-        name: slug,
-        desc: `<a href="https://dnd5e.wikidot.com/spell:${slug}" target="_blank">View spell on Wiki.</a>`,
-      };
-    }),
-    ...(legendary_actions || []).map(la => ({
-      name: "(L) " + la.name,
-      desc: la.desc
-    }))
-  ];
+    resistances_and_immunities = {},
+    ability_scores = {},
+    saving_throws_all = {},
+    document,
+  } = monsterData
+  const { walk, fly, burrow, swim, climb } = monsterData.speed_all ?? {}
+  const regularActions = actions
+    .filter(a => a.action_type === "ACTION")
+    .map(a => ({ name: a.name, desc: a.desc }))
 
-    let stats
-        if(monsterData.stats){
-             stats = {
-                strength: Number(monsterData.stats.strength),
-                dexterity: Number(monsterData.stats.dexterity),
-                constitution: Number(monsterData.stats.constitution),
-                intelligence: Number(monsterData.stats.intelligence),
-                wisdom: Number(monsterData.stats.wisdom),
-                charisma: Number(monsterData.stats.charisma)
-        }
-    }
-        else{
-             stats = {
-                strength: Number(strength),
-                dexterity: Number(dexterity),
-                constitution: Number(constitution),
-                intelligence: Number(intelligence),
-                wisdom: Number(wisdom),
-                charisma: Number(charisma)
-        }
-    }
+  const legendaryActions = actions
+    .filter(a => a.action_type === "LEGENDARY_ACTION" && a.legendary_action_cost)
+    .map(a => ({ name: "(L) " + a.name, desc: a.desc }))
 
-    let saves
-    if(monsterData.saves){
-         saves = {
-            strength_save: Number(monsterData.saves.strength_save),
-            dexterity_save: Number(monsterData.saves.dexterity_save),
-            constitution_save: Number(monsterData.saves.constitution_save),
-            intelligence_save: Number(monsterData.saves.intelligence_save),
-            wisdom_save: Number(monsterData.saves.wisdom_save),
-            charisma_save: Number(monsterData.saves.charisma_save),
-    }
-    }
-    else{
-         saves = {
-            strength_save: Number(strength_save),
-            dexterity_save: Number(dexterity_save),
-            constitution_save: Number(constitution_save),
-            intelligence_save: Number(intelligence_save),
-            wisdom_save: Number(wisdom_save),
-            charisma_save: Number(charisma_save),
-    }
+  const allActions = [...regularActions, ...legendaryActions]
 
-    }
-  const traits = [
-    ...(special_abilities || []).map(t => ({
-      name: t.name,
-      desc: t.desc
-    })),
-    ...(senses ? [{
-      name: "Senses",
-      desc: senses
-    }] : [])
+  const stats = {
+    strength:     Number(ability_scores.strength),
+    dexterity:    Number(ability_scores.dexterity),
+    constitution: Number(ability_scores.constitution),
+    intelligence: Number(ability_scores.intelligence),
+    wisdom:       Number(ability_scores.wisdom),
+    charisma:     Number(ability_scores.charisma),
+  };
+
+  const saves = {
+    strength_save:     Number(saving_throws_all.strength),
+    dexterity_save:    Number(saving_throws_all.dexterity),
+    constitution_save: Number(saving_throws_all.constitution),
+    intelligence_save: Number(saving_throws_all.intelligence),
+    wisdom_save:       Number(saving_throws_all.wisdom),
+    charisma_save:     Number(saving_throws_all.charisma),
+  };
+
+  const allTraits = [
+    ...traits.map(t => ({ name: t.name, desc: t.desc })),
+    ...(senses ? [{ name: "Senses", desc: senses }] : []),
   ]
-
-  const resistances = parseDelimitedList(damage_resistances)
+  const resistances = resistances_and_immunities.damage_resistances.map(r => r.name)
   const immunities = [
-    ...parseDelimitedList(damage_immunities),
-    ...parseDelimitedList(condition_immunities)
-  ];
-  const vulnerabilities = parseDelimitedList(damage_vulnerabilities) 
+    ...resistances_and_immunities.damage_immunities.map(i => i.name),
+    ...resistances_and_immunities.condition_immunities.map(i => i.name),
+  ]
+const vulnerabilities = resistances_and_immunities.damage_vulnerabilities.map(v => v.name)
+  
+  const legendarySlots = actions
+    .find(a => a.action_type === "LEGENDARY_ACTION" && a.order_in_statblock === 0)
+    ?.desc || null
 
   return new Creature({
-    slug,
+    key: key,
     name,
-    type,
-    languages: languages || "",
+    type: type?.name || type,
+    languages: languages?.as_string || "",
     hit_points: Number(hit_points),
     armor_class: Number(armor_class),
-    speed,
+    cr: Number(challenge_rating),
+    speed: {walk, fly, burrow, swim, climb},
+    init: initiative_bonus,
     actions: allActions,
-    legendarySlots: legendary_desc,
+    legendarySlots,
     stats,
     saves,
     resistances,
     immunities,
-    vulnerabilities, 
-    traits,
+    vulnerabilities,
+    traits: allTraits,
     hit_dice,
-    document__title: document__title
-  });
+    document__title: document?.display_name || "",
+  })
 }
-
-function parseDelimitedList(input) {
-  if (!input || typeof input !== 'string') return [];
-  return input
-    .split(/[,;]+/)
-    .map(s => s.trim())
-    .filter(s => s.length > 0);
-} 
  
-export { Creature, creatureList, homebrewCreatureList, createHomebrew, removeHomebrew, transformIntoSlug , searchMonster, getMonster, selectSlugFromResults, convertToCreature, parseDelimitedList }
+export { Creature, creatureList, homebrewCreatureList, createHomebrew, removeHomebrew , searchMonster, getMonster, selectSlugFromResults, convertToCreature}
